@@ -1,0 +1,270 @@
+@import 'tailwindcss';
+@custom-variant dark (&:is([data-theme=dark], [data-theme=dark] &));
+@custom-variant light (&:is([data-theme=light], [data-theme=light] &));
+
+
+@source inline('{,hover:}bg-{primary,secondary,tertiary,base,accent,accenttwo,accentthree,border,neutral,neutraltwo,error,success}');
+@source inline('{,hover:}text-{primary,secondary,tertiary,base,accent,accenttwo,accentthree,border,neutral,neutraltwo,error,success}');
+@source inline('{,hover:}border-{primary,secondary,tertiary,base,accent,accenttwo,accentthree,border,neutral,neutraltwo,error,success}');
+@source inline('lg:col-span-{4,6,8,12}');
+
+/* Light theme (explicit) as to allow forced theming on a per-component basis */
+html {
+  --color-primary: #060513;
+  --color-secondary: #0e0e9a;
+  --color-tertiary: #9ecde4;
+  --color-base: #ffffff;
+  --color-accent: #231b67;
+  --color-accenttwo: #c5a4e9;
+  --color-accentthree: #e7d8fa;
+  --color-border: #a5a5aa;
+  --color-neutral: #eee;
+  --color-neutraltwo: #a5a5aa;
+  --color-error: #d8000c;
+  --color-success: #008550;
+  --color-warning: #ef8500;
+  --color-surface: #ffffff;
+  --color-black: #060513;
+  --color-white: #ffffff;
+}
+
+/* Dark theme */
+[data-theme='dark'] {
+  --color-primary: #e8e8e8;
+  --color-secondary: #0e0e9a;
+  --color-tertiary: #9ecde4;
+  --color-base: #060513;
+  --color-accent: #231b67;
+  --color-accenttwo: #c5a4e9;
+  --color-accentthree: #e7d8fa;
+  --color-border: #a5a5aa;
+  --color-neutral: #a5a5aa;
+  --color-neutraltwo: #eee;
+  --color-error: #cf6679;
+  --color-success: #29c467;
+  --color-warning: #ff9800;
+  --color-surface: #111320;
+  --color-black: #060513;
+  --color-white: #ffffff;
+}
+
+@theme static {
+  /* Colors - yes a bit stupid. But this way we have access to tailwind classes*/
+  --color-primary: --color-primary;
+  --color-secondary: --color-secondary;
+  --color-tertiary: --color-tertiary;
+  --color-base: --color-base;
+  --color-accent: --color-accent;
+  --color-accenttwo: --color-accenttwo;
+  --color-accentthree: --color-accentthree;
+  --color-border: --color-border;
+  --color-neutral: --color-neutral;
+  --color-neutraltwo: --color-neutraltwo;
+  --color-error: --color-error;
+  --color-success: --color-success;
+  --color-surface: --color-surface;
+  --color-black: --color-black;
+  --color-white: --color-white;
+}
+
+@theme {
+  /* Container */
+  --container-padding: 1rem;
+  --container-padding-sm: 1rem;
+  --container-padding-md: 2rem;
+  --container-padding-lg: 2rem;
+  --container-padding-xl: 2rem;
+  --container-padding-2xl: 2rem;
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 86rem;
+
+  /* Fonts */
+  --font-sans: Montserrat, sans-serif;
+
+  /* Font sizes */
+  --text-display: 4rem;
+  --leading-display: normal;
+  --font-weight-display: 600;
+  --text-transform-display: uppercase;
+
+  --text-h1: 3.125rem;
+  --leading-h1: normal;
+  --font-weight-h1: 600;
+  --text-transform-h1: uppercase;
+
+  --text-h2: 2.1875rem;
+  --leading-h2: normal;
+  --font-weight-h2: 600;
+  --text-transform-h2: uppercase;
+
+  --text-h3: 1.375rem;
+  --leading-h3: normal;
+  --font-weight-h3: 400;
+
+  --text-h3-hover: 1.375rem;
+  --leading-h3-hover: normal;
+  --font-weight-h3-hover: 400;
+  --text-decoration-h3-hover: underline;
+
+  --text-h4: 1.125rem;
+  --leading-h4: normal;
+  --font-weight-h4: 600;
+
+  --text-body: 1rem;
+  --leading-body: 1.5rem;
+  --font-weight-body: 400;
+
+  --text-body-semibold: 1rem;
+  --leading-body-semibold: normal;
+  --font-weight-body-semibold: 600;
+
+  --text-body-underline: 1rem;
+  --leading-body-underline: 1.375rem;
+  --font-weight-body-underline: 600;
+  --text-decoration-body-underline: underline;
+
+  --text-helper: 0.875rem;
+  --leading-helper: normal;
+  --font-weight-helper: 400;
+
+  --text-button: 1.125rem;
+  --leading-button: normal;
+  --font-weight-button: 700;
+
+  /* Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+html,
+html[data-theme='light'] {
+  opacity: initial;
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border, currentcolor);
+  }
+  body {
+    @apply bg-base min-h-screen flex flex-col text-primary;
+  }
+}
+
+.hero-header h1 {
+  @apply text-h1 lg:text-display;
+}
+
+/* Container mimics tailwindcss3 container behavior */
+@layer base {
+  .container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .container {
+      max-width: 40rem;
+      padding-inline: 1rem;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .container {
+      max-width: 48rem;
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .container {
+      max-width: 64rem;
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .container {
+      max-width: 80rem;
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 86rem) {
+    .container {
+      max-width: 86rem;
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 96rem) {
+    .container {
+      max-width: 96rem;
+    }
+  }
+}
+/* Typography */
+@layer base {
+  h1 {
+    @apply text-h1 leading-h1 font-h1;
+  }
+
+  h2 {
+    @apply text-h2 leading-h2 font-h2;
+  }
+
+  h3 {
+    @apply text-h3 leading-h3 font-h3;
+  }
+
+  h4 {
+    @apply text-h4 leading-h4 font-h4;
+  }
+
+  p {
+    @apply text-body leading-body font-body;
+  }
+
+  strong {
+    @apply font-bold;
+  }
+}
+
+main {
+  animation: main-fade-in-up 0.3s ease-out both;
+}
+@keyframes main-fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
