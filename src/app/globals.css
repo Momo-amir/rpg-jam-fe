@@ -1,7 +1,7 @@
 @import 'tailwindcss';
+@import "tw-animate-css";
 @custom-variant dark (&:is([data-theme=dark], [data-theme=dark] &));
 @custom-variant light (&:is([data-theme=light], [data-theme=light] &));
-
 
 @source inline('{,hover:}bg-{primary,secondary,tertiary,base,accent,accenttwo,accentthree,border,neutral,neutraltwo,error,success}');
 @source inline('{,hover:}text-{primary,secondary,tertiary,base,accent,accenttwo,accentthree,border,neutral,neutraltwo,error,success}');
@@ -173,6 +173,9 @@ html[data-theme='light'] {
   body {
     @apply bg-base min-h-screen flex flex-col text-primary;
   }
+  html {
+    @apply font-sans;
+  }
 }
 
 .hero-header h1 {
@@ -268,3 +271,4 @@ main {
     transform: translateY(0);
   }
 }
+
