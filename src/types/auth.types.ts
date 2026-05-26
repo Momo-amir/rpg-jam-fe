@@ -9,7 +9,9 @@ export const registerSchema = z
   .object({
     username: z.string().min(3, "At least 3 character").max(32),
     email: z.email("Enter a valid email"),
-    password: z.string().min(8, "Required"),
+    password: z
+      .string()
+      .min(8, "Make sure your password is atleast 8 characters*"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

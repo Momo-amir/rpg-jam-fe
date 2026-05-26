@@ -2,7 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 import { getSession } from "./session";
-import { type User } from "@/types/user";
+import { type User } from "@/types/user.types";
 
 export async function verifySession(): Promise<User> {
   const user = await getSession();

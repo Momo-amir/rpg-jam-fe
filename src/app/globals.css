@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is([data-theme=dark], [data-theme=dark] &));
 @custom-variant light (&:is([data-theme=light], [data-theme=light] &));
@@ -11,11 +11,11 @@
 /* Light theme (explicit) as to allow forced theming on a per-component basis */
 html {
   --color-primary: #060513;
-  --color-secondary: #0e0e9a;
+  --color-secondary: #2a50a1;
   --color-tertiary: #9ecde4;
   --color-base: #ffffff;
-  --color-accent: #231b67;
-  --color-accenttwo: #c5a4e9;
+  --color-accent: #b59e54;
+  --color-accenttwo: #91a1b2;
   --color-accentthree: #e7d8fa;
   --color-border: #a5a5aa;
   --color-neutral: #eee;
@@ -29,12 +29,12 @@ html {
 }
 
 /* Dark theme */
-[data-theme='dark'] {
+[data-theme="dark"] {
   --color-primary: #e8e8e8;
-  --color-secondary: #0e0e9a;
+  --color-secondary: #7b469b;
   --color-tertiary: #9ecde4;
   --color-base: #060513;
-  --color-accent: #231b67;
+  --color-accent: #555752;
   --color-accenttwo: #c5a4e9;
   --color-accentthree: #e7d8fa;
   --color-border: #a5a5aa;
@@ -158,7 +158,7 @@ html {
 }
 
 html,
-html[data-theme='light'] {
+html[data-theme="light"] {
   opacity: initial;
 }
 
@@ -272,3 +272,22 @@ main {
   }
 }
 
+@keyframes field-error-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.field-error {
+  animation: field-error-in 0.15s ease-out both;
+}
+
+@layer utilities {
+  .error-text {
+    @apply text-sm text-error min-h-6 ml-2;
+  }
+}

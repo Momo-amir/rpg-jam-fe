@@ -36,7 +36,7 @@ function Input({
 }: InputPrimitive.Props & VariantProps<typeof inputVariants>) {
   return (
     <InputPrimitive
-      data-slot="input"
+      data-slot='input'
       className={cn(inputVariants({ variant, inputSize, className }))}
       {...props}
     />
