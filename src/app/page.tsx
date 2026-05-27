@@ -1,5 +1,3 @@
-import { Login } from "@/components/Login";
-import { Register } from "@/components/Register";
 import { ThemeSelector } from "@/providers/Theme/ThemeSelector";
 import Image from "next/image";
 
@@ -14,8 +12,6 @@ export default function Home() {
         <h3 className='text-accentthree '>hellos</h3>
         <h2 className='text-accentthree'>HELLO</h2>
         <p className='text-accentthree'>hellos</p>
-        <Login />
-        <Register />
       </div>
     </main>
   );

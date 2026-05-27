@@ -1,21 +1,21 @@
 "use client";
 
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loginSchema, LoginFormValues } from "@/models/schemas/auth";
-import { login as userLogin } from "@/utils/api/auth"
+import { login as userLogin } from "@/utils/api/auth";
 
 //TODO - Add Zod validation, add react-hook-form client validation
 
-export const Login: React.FC = () => {
+export const LoginComponent: React.FC = () => {
   const {
     register,
     handleSubmit,
     setError,
-    formState: {errors, isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onTouched",
@@ -24,12 +24,9 @@ export const Login: React.FC = () => {
   async function onSubmit(data: LoginFormValues) {
     try {
       await userLogin(data);
-    }
-    catch (error) {
+    } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Wrong email or password.";
+        error instanceof Error ? error.message : "Wrong email or password.";
       setError("root", { message });
     }
   }
@@ -70,9 +67,7 @@ export const Login: React.FC = () => {
         />
         <p className='error-text'>
           {errors.password && (
-            <span className='field-error'>
-              {errors.password.message}
-            </span>
+            <span className='field-error'>{errors.password.message}</span>
           )}
         </p>
       </div>
