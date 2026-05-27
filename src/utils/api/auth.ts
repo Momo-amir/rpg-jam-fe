@@ -7,14 +7,14 @@ import {
 } from "@/models/schemas/auth";
 
 export async function login(data: LoginFormValues) {
-  const response = await apiClient.post("/api/auth/login", data);
+  const response = await apiClient.post("/api/login", data);
   const user = userSchema.parse(response.data.user);
   useAuthStore.getState().setUser(user);
   return user;
 }
 
 export async function register(data: RegisterFormValues) {
-  const response = await apiClient.post("/api/auth/register", {
+  const response = await apiClient.post("/api/register", {
     username: data.username,
     email: data.email,
     password: data.password,

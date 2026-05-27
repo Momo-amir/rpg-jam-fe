@@ -7,7 +7,9 @@ const publicPaths = ["/", "/login", "/register"];
 
 export async function proxy(request: NextRequest) {
   const isPublic = publicPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path),
+    path === "/"
+      ? request.nextUrl.pathname === "/"
+      : request.nextUrl.pathname.startsWith(path),
   );
 
   const token = request.cookies.get("access_token")?.value;
@@ -36,3 +38,7 @@ export async function proxy(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+};
