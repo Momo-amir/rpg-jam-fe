@@ -40,7 +40,7 @@ export const Login: React.FC = () => {
       className='flex flex-col gap-3 px-4 py-8 border rounded-lg border-border'
     >
       <div className='flex flex-col gap-1'>
-        <label htmlFor='username' className='sr-only'>
+        <label htmlFor='email' className='sr-only'>
           Email
         </label>
         <Input
