@@ -4,7 +4,7 @@ import { Form, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LoginFormValues } from "@/types/auth.types";
+import { LoginFormValues } from "@/models/schemas/auth";
 
 //TODO - Add Zod validation, add react-hook-form client validation
 

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RegisterFormValues, registerSchema } from "../../types/auth.types";
+import { RegisterFormValues, registerSchema } from "../../models/schemas/auth";
 import { register as registerUser } from "@/utils/api/auth";
 
 export const Register: React.FC = () => {

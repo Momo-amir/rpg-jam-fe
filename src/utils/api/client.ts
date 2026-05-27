@@ -1,11 +1,11 @@
 import axios from "axios";
+import { OnAuthFailure } from "@/models/types/api.types";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true, // this is the request part of the setup, we need to only handle response
 });
 
-type OnAuthFailure = () => void;
 let onAuthFailure: OnAuthFailure = () => {};
 
 export function setOnAuthFailure(callback: OnAuthFailure) {
