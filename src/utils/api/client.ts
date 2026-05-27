@@ -17,7 +17,6 @@ let isRefreshing = false;
 // TODO make sure we queue requests that come in while we're refreshing so we don't have multiple refresh requests going out at the same time, and also make sure to retry those queued requests once we get a new token.
 // Refresh token should silenetly extend the session without the user having to log in again.
 
-// A route akin to api/auth/refresh would make it so we can tighten security keep the JWT short lived (like an hour) but instead of logging us out there we take the 401 request timed out and serve a new token to the frontend that is then kept in store.
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
