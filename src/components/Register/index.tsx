@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -9,6 +10,7 @@ import { RegisterFormValues, registerSchema } from "../../models/schemas/auth";
 import { register as registerUser } from "@/utils/api/auth";
 
 export const RegisterComponent: React.FC = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -22,6 +24,7 @@ export const RegisterComponent: React.FC = () => {
   async function onSubmit(data: RegisterFormValues) {
     try {
       await registerUser(data);
+      router.push("/login");
     } catch (error) {
       const message =
         error instanceof Error

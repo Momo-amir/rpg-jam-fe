@@ -36,10 +36,10 @@ export const ThemeSelector: React.FC = () => {
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger aria-label='Select a theme' className='w-36'>
+      <SelectTrigger aria-label='Select a theme' className='w-20 h-8'>
         <SelectValue placeholder='Theme' />
       </SelectTrigger>
-      <SelectPopup className='w-36'>
+      <SelectPopup className='w-20'>
         <SelectItem value='auto'>Auto</SelectItem>
         {themes.map(({ value, label }) => (
           <SelectItem key={value} value={value}>
