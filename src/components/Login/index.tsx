@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -11,6 +13,7 @@ import { login as userLogin } from "@/utils/api/auth";
 //TODO - Add Zod validation, add react-hook-form client validation
 
 export const LoginComponent: React.FC = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -24,6 +27,7 @@ export const LoginComponent: React.FC = () => {
   async function onSubmit(data: LoginFormValues) {
     try {
       await userLogin(data);
+      router.push("/dashboard");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Wrong email or password.";
@@ -75,6 +79,12 @@ export const LoginComponent: React.FC = () => {
       <Button type='submit' disabled={isSubmitting}>
         {isSubmitting ? "Logging in..." : "Login"}
       </Button>
+      <p className='text-sm text-center'>
+        Don&apos;t have an account?{" "}
+        <Link href='/register' className='underline'>
+          Sign up
+        </Link>
+      </p>
     </form>
   );
 };
