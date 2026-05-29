@@ -40,7 +40,7 @@ export default async function RootLayout({
       </head>
       <body className='min-h-full flex flex-col'>
         <Providers initialUser={user}>
-          <header className='sticky top-0 z-50'>
+          <header className=''>
             <Nav />
           </header>
           {children}

@@ -17,7 +17,7 @@ export default function Nav() {
   }
 
   return (
-    <nav className='sticky top-0 px-6 py-3 border-b border-white/20 z-50 bg-transparent backdrop-blur-xs'>
+    <nav className='sticky top-0 px-6 py-3 border-b border-white/20 z-30 bg-transparent backdrop-blur-xs'>
       <div className='flex items-center justify-between container'>
         <div className='flex items-center gap-6'>
           <Link href='/' className='font-semibold text-lg'>

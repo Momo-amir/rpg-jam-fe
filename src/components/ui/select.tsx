@@ -7,7 +7,7 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 const selectTriggerVariants = cva(
-  "inline-flex w-full items-center justify-between gap-2 rounded-lg border bg-transparent px-3 font-body text-body leading-body text-primary outline-none transition-all disabled:pointer-events-none disabled:opacity-50 [&[data-popup-open]]:border-secondary [&[data-popup-open]]:ring-2 [&[data-popup-open]]:ring-secondary/20",
+  "inline-flex w-full items-center justify-between gap-2 cursor-pointer rounded-lg border bg-transparent px-3 font-body text-body leading-body text-primary outline-none transition-all disabled:pointer-events-none disabled:opacity-50 [&[data-popup-open]]:border-secondary [&[data-popup-open]]:ring-2 [&[data-popup-open]]:ring-secondary/20",
   {
     variants: {
       variant: {
@@ -52,7 +52,12 @@ function SelectTrigger({
 function SelectPopup({ className, ...props }: SelectPrimitive.Popup.Props) {
   return (
     <SelectPrimitive.Portal>
-      <SelectPrimitive.Positioner side='bottom' align='start' sideOffset={6} alignItemWithTrigger={false}>
+      <SelectPrimitive.Positioner
+        side='bottom'
+        align='start'
+        sideOffset={6}
+        alignItemWithTrigger={false}
+      >
         <SelectPrimitive.Popup
           data-slot='select-popup'
           className={cn(
