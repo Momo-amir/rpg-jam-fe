@@ -42,7 +42,7 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon className='shrink-0 text-neutraltwo'>
+      <SelectPrimitive.Icon className='shrink-0 '>
         <ChevronDown size={16} />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
@@ -57,11 +57,12 @@ function SelectPopup({ className, ...props }: SelectPrimitive.Popup.Props) {
         align='start'
         sideOffset={6}
         alignItemWithTrigger={false}
+        className='z-50'
       >
         <SelectPrimitive.Popup
           data-slot='select-popup'
           className={cn(
-            "z-50  origin-(--transform-origin) overflow-hidden rounded-lg border border-border bg-surface py-1 text-primary shadow-lg outline-none transition-[opacity,scale,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+            "origin-(--transform-origin) overflow-hidden rounded-lg border border-border bg-surface py-1 text-inherit shadow-lg outline-none transition-[opacity,scale,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
             className,
           )}
           {...props}
@@ -114,7 +115,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot='select-item'
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 px-3 py-2 font-body text-body leading-body text-primary outline-none transition-colors data-highlighted:bg-neutral data-selected:font-medium",
+        "relative flex cursor-pointer select-none items-center gap-2 px-3 py-2 font-body text-body leading-body text-primary outline-none transition-colors data-highlighted:bg-neutral data-selected:font-medium",
         className,
       )}
       {...props}
