@@ -2,13 +2,15 @@ import React from "react";
 
 import { AuthProvider } from "./AuthProvider";
 import { ThemeProvider } from "./Theme";
+import { type User } from "@/models/schemas/user";
 
-export const Providers: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const Providers: React.FC<{
+  children: React.ReactNode;
+  initialUser?: User | null;
+}> = ({ children, initialUser }) => {
   return (
     <ThemeProvider>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider initialUser={initialUser}>{children}</AuthProvider>
     </ThemeProvider>
   );
 };

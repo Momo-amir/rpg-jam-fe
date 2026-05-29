@@ -10,8 +10,9 @@ export async function verifySession(): Promise<User> {
   return user;
 }
 
-export async function verifyRole(role: string): Promise<User> {
+// roles are post-MVP — placeholder until C# returns them in the JWT/response
+export async function verifyRole(_role: string): Promise<User> {
   const user = await verifySession();
-  if (!user.roles.includes(role)) redirect("/");
+  redirect("/");
   return user;
 }

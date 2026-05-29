@@ -14,7 +14,11 @@ export const getSession = cache(async (): Promise<User | null> => {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    return userSchema.parse(payload);
+    return userSchema.parse({
+      identifier: payload["unique_name"],
+      displayName: payload["name"],
+      email: payload["email"],
+    });
   } catch {
     return null;
   }
