@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/providers";
 import { InitTheme } from "@/providers/Theme/InitTheme";
 import { getSession } from "@/lib/session";
-import Image from "next/image";
 
 import Nav from "@/components/Nav";
 import { D20Icon } from "@/components/ui/D20Icon";

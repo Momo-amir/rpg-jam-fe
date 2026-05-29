@@ -258,7 +258,8 @@ html[data-theme="light"] {
   }
 }
 
-main {
+main,
+.fade-in-up {
   animation: main-fade-in-up 0.3s ease-out both;
 }
 @keyframes main-fade-in-up {
