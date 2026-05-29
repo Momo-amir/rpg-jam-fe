@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 10 432 492" fill="none" stroke-width="22" stroke-linejoin="round" stroke-linecap="round">
+  <style>
+    path, line, polygon { stroke: #000; }
+    @media (prefers-color-scheme: dark) {
+      path, line, polygon { stroke: #fff; }
+    }
+  </style>
+  <polygon points="256,36 447,146 447,366 256,476 65,366 65,146" />
+  <line x1="256" y1="36" x2="65" y2="366" />
+  <line x1="256" y1="36" x2="447" y2="366" />
+  <line x1="65" y1="366" x2="447" y2="366" />
+  <line x1="256" y1="476" x2="256" y2="366" />
+  <line x1="65" y1="146" x2="160" y2="201" />
+  <line x1="447" y1="146" x2="352" y2="201" />
+  <line x1="160" y1="201" x2="352" y2="201" />
+  <line x1="256" y1="366" x2="160" y2="201" />
+  <line x1="256" y1="366" x2="352" y2="201" />
+</svg>

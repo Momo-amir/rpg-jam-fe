@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
+  <polygon points="256,36 447,146 447,366 256,476 65,366 65,146" />
+
+  <!-- Top to bottom-left -->
+  <line x1="256" y1="36" x2="65" y2="366" />
+  <!-- Top to bottom-right -->
+  <line x1="256" y1="36" x2="447" y2="366" />
+
+  <!-- Bottom-left to bottom-right -->
+  <line x1="65" y1="366" x2="447" y2="366" />
+
+  <!-- Bottom point up to center of horizontal line -->
+  <line x1="256" y1="476" x2="256" y2="366" />
+
+  <!-- Upper-left clipped to intersection with top→bottom-left diagonal -->
+  <line x1="65" y1="146" x2="160" y2="201" />
+
+  <!-- Upper-right clipped to intersection with top→bottom-right diagonal -->
+  <line x1="447" y1="146" x2="352" y2="201" />
+
+  <!-- Horizontal connecting the two intersection points -->
+  <line x1="160" y1="201" x2="352" y2="201" />
+
+  <!-- Bottom of vertical to upper-left intersection -->
+  <line x1="256" y1="366" x2="160" y2="201" />
+
+  <!-- Bottom of vertical to upper-right intersection (mirrored) -->
+  <line x1="256" y1="366" x2="352" y2="201" />
+</svg>
