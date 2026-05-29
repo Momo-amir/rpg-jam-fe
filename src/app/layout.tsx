@@ -49,7 +49,7 @@ export default async function RootLayout({
           <header className=''>
             <Nav />
           </header>
-          <div className='fixed left-40 top-1/2 -translate-y-1/2 -translate-x-1/3 rotate-20 opacity-4 pointer-events-none select-none w-400'>
+          <div className='fixed left-40 top-1/2 -translate-y-1/2 -translate-x-1/3 rotate-20 opacity-4 pointer-events-none select-none  w-1/2'>
             <D20Icon className='w-full text-primary' />
           </div>
           {children}
