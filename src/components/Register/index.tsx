@@ -40,19 +40,19 @@ export const RegisterComponent: React.FC = () => {
       className='flex flex-col gap-3 px-4 py-8 border rounded-lg border-border'
     >
       <div className='flex flex-col gap-1'>
-        <label htmlFor='username' className='sr-only'>
-          Username
+        <label htmlFor='displayName' className='sr-only'>
+          Display name
         </label>
         <Input
-          id='username'
+          id='displayName'
           type='text'
-          placeholder='Username'
-          variant={errors.username ? "error" : "default"}
-          {...register("username")}
+          placeholder='Display name'
+          variant={errors.displayName ? "error" : "default"}
+          {...register("displayName")}
         />
         <p className='error-text'>
-          {errors.username && (
-            <span className='field-error'>{errors.username.message}</span>
+          {errors.displayName && (
+            <span className='field-error'>{errors.displayName.message}</span>
           )}
         </p>
       </div>

@@ -20,7 +20,7 @@ export default function Hero({
   imageAlt,
 }: HeroProps) {
   return (
-    <div className='relative w-full min-h-[80dvh] flex items-center -mt-14'>
+    <div className='relative w-full min-h-[93dvh] flex items-center -mt-14'>
       {/* Mobile/tablet: full-bleed background image */}
       <Image
         fill

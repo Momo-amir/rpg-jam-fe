@@ -8,11 +8,8 @@ import {
 
 export async function login(data: LoginFormValues) {
   const response = await apiClient.post("/api/login", data);
-  // safeParse returns { success, data } instead of throwing on mismatch when we login.
-  // parse() used before would throw if the API response shape doesn't match userSchema,
-  // blocking the return and preventing the token from being set in the store until user refreshes
+  // safeParse instead of parse so a shape mismatch doesn't block the login return.
   // TODO - Add better error handling for API response validation failure
-  // TODO - Figure out what the user data shape is on the API response and update userSchema accordingly to avoid having to do this
   const user = userSchema.safeParse(response.data.user);
   if (user.success) useAuthStore.getState().setUser(user.data);
   return response.data;
@@ -20,7 +17,7 @@ export async function login(data: LoginFormValues) {
 
 export async function register(data: RegisterFormValues) {
   const response = await apiClient.post("/api/register", {
-    username: data.username,
+    displayName: data.displayName,
     email: data.email,
     password: data.password,
   });
