@@ -40,8 +40,8 @@ export const RegisterComponent: React.FC = () => {
     <div className='border border-white/10 rounded-2xl flex w-full shadow-2xl backdrop-blur-md dark:bg-black/30 bg-white/10'>
       <div className='flex flex-col items-center px-10 py-16 w-full md:w-1/2'>
         <div className='flex flex-col items-center gap-2 mb-2'>
-          <h2 className='tracking-tight'>Join us! Create an account</h2>
-          <p className=''>Enter your details to start your next adventure!</p>
+          <h2 className='tracking-tight'>Create an account</h2>
+          <p className=''>Enter your details start your next adventure!</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
