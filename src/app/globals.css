@@ -31,7 +31,7 @@ html {
 /* Dark theme */
 [data-theme="dark"] {
   --color-primary: #e8e8e8;
-  --color-secondary: #7b469b;
+  --color-secondary: #5f1c8a;
   --color-tertiary: #9ecde4;
   --color-base: #060513;
   --color-accent: #555752;
@@ -138,6 +138,29 @@ html {
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-d20-spin: d20-spin 1.2s ease-in-out infinite;
+
+  @keyframes d20-spin {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0);
+    }
+    45% {
+      transform: translateY(-8px) rotate(200deg);
+      animation-timing-function: cubic-bezier(0.33, 1, 0.66, 1);
+    }
+    75% {
+      transform: translateY(0) rotate(330deg);
+      animation-timing-function: cubic-bezier(0.22, 0, 0.58, 1);
+    }
+    88% {
+      transform: translateY(-3px) rotate(352deg);
+      animation-timing-function: cubic-bezier(0.33, 1, 0.66, 1);
+    }
+    100% {
+      transform: translateY(0) rotate(360deg);
+    }
+  }
 
   @keyframes accordion-down {
     from {

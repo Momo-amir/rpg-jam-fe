@@ -5,7 +5,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const publicPaths = ["/", "/login", "/register"];
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const isPublic = publicPaths.some((path) =>
     path === "/"
       ? request.nextUrl.pathname === "/"

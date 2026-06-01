@@ -6,7 +6,7 @@ import { logout } from "@/utils/api/auth";
 import { Button } from "@/components/ui/button";
 import { ThemeSelector } from "@/providers/Theme/ThemeSelector";
 import { useSession } from "@/hooks/useSession";
-import { D20Icon } from "../ui/D20Icon";
+import { D20Icon } from "../ui/icons/D20Icon";
 
 export default function Nav() {
   const router = useRouter();
