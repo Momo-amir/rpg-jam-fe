@@ -41,7 +41,7 @@ export const RegisterComponent: React.FC = () => {
       <div className='flex flex-col items-center px-10 py-16 w-full md:w-1/2'>
         <div className='flex flex-col items-center gap-2 mb-2'>
           <h2 className='tracking-tight'>Create an account</h2>
-          <p className=''>Enter your details start your next adventure!</p>
+          <p className=''>Enter your details and start your next adventure!</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
