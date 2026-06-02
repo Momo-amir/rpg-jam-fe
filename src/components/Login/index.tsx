@@ -81,7 +81,7 @@ export const LoginComponent: React.FC = () => {
             </p>
           </div>
 
-          <Button type='submit' disabled={isSubmitting} className='mt-2'>
+          <Button type='submit' loading={isSubmitting} className='mt-2'>
             {isSubmitting ? "Logging in..." : "Login"}
           </Button>
           <p className='text-sm text-center'>

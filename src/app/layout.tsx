@@ -5,8 +5,9 @@ import { InitTheme } from "@/providers/Theme/InitTheme";
 import { getSession } from "@/lib/session";
 
 import Nav from "@/components/Nav";
-import { D20Icon } from "@/components/ui/D20Icon";
+import { D20Icon } from "@/components/ui/icons/D20Icon";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default async function RootLayout({
             <D20Icon className='w-full text-primary' />
           </div>
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>

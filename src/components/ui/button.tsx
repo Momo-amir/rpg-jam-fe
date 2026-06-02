@@ -2,9 +2,10 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/utils/cn";
+import { D20Icon } from "./icons/D20Icon";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-lg border cursor-pointer border-transparent font-button text-button leading-button whitespace-nowrap transition-all outline-none cursor select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center rounded-lg border cursor-pointer border-transparent font-button text-button leading-button whitespace-nowrap transition-all outline-none cursor select-none disabled:pointer-events-none disabled:opacity-80 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -28,18 +29,38 @@ const buttonVariants = cva(
   },
 );
 
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    loading?: boolean;
+    loadingText?: string;
+  };
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  loading = false,
+  loadingText,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       data-slot='button'
+      disabled={disabled || loading}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {loading ? (
+        <>
+          <D20Icon className='size-5 animate-d20-spin' />
+          {loadingText}
+        </>
+      ) : (
+        children
+      )}
+    </ButtonPrimitive>
   );
 }
 
