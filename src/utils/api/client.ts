@@ -1,4 +1,7 @@
-import axios from "axios";
+import axios, {
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
 import { OnAuthFailure } from "@/models/types/api.types";
 
 export const apiClient = axios.create({
@@ -14,34 +17,67 @@ export function setOnAuthFailure(callback: OnAuthFailure) {
 
 let isRefreshing = false;
 
-// TODO make sure we queue requests that come in while we're refreshing so we don't have multiple refresh requests going out at the same time, and also make sure to retry those queued requests once we get a new token.
-// Refresh token should silenetly extend the session without the user having to log in again.
+type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+type QueuedRequest = {
+  config: RetriableRequestConfig;
+  resolve: (value: AxiosResponse | PromiseLike<AxiosResponse>) => void;
+  reject: (reason?: unknown) => void;
+};
+
+let queuedRequests: QueuedRequest[] = [];
+
+function retryQueuedRequests(error?: unknown) {
+  const requests = queuedRequests;
+  queuedRequests = [];
+
+  requests.forEach(({ config, resolve, reject }) => {
+    if (error) {
+      reject(error);
+      return;
+    }
+
+    resolve(apiClient(config));
+  });
+}
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config as RetriableRequestConfig | undefined;
     const message =
       error.response?.data?.message ??
       error.message ??
       "Unexpected server error";
+    const isRefreshRequest = originalRequest?.url === "/api/auth/refresh";
 
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isRefreshing
+      originalRequest &&
+      !isRefreshRequest &&
+      !originalRequest._retry
     ) {
       originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise<AxiosResponse>((resolve, reject) => {
+          queuedRequests.push({ config: originalRequest, resolve, reject });
+        });
+      }
+
       isRefreshing = true;
 
       try {
         await apiClient.post("/api/auth/refresh");
         isRefreshing = false;
+        retryQueuedRequests();
         return apiClient(originalRequest);
       } catch {
+        const authError = new Error(message);
         isRefreshing = false;
+        retryQueuedRequests(authError);
         onAuthFailure();
-        return Promise.reject(new Error(message));
+        return Promise.reject(authError);
       }
     }
 

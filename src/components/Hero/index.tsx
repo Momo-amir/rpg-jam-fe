@@ -1,15 +1,7 @@
-import Image, { type StaticImageData } from "next/image";
+import Image from "next/image";
 import Link from "next/link";
+import { HeroProps } from "@/models/interfaces/hero.interface";
 import { Button } from "@/components/ui/button";
-
-interface HeroProps {
-  heading: string;
-  subheading: string;
-  primaryButtonLabel: string;
-  secondaryButtonLabel: string;
-  imageSrc: string | StaticImageData;
-  imageAlt: string;
-}
 
 export default function Hero({
   heading,
@@ -20,7 +12,7 @@ export default function Hero({
   imageAlt,
 }: HeroProps) {
   return (
-    <div className='relative w-full min-h-[93dvh] flex items-center -mt-14 isolate'>
+    <div className='relative w-full min-h-[93dvh] flex items-center -mt-14 isolate overflow-x-hidden'>
       {/* Mobile/tablet: full-bleed background image */}
       <Image
         fill

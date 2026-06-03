@@ -10,7 +10,7 @@ import { D20Icon } from "../ui/icons/D20Icon";
 
 export default function Nav() {
   const router = useRouter();
-  const { isLoggedIn } = useSession();
+  const { isLoggedIn } = useSession(); // the {} around the value means we're destructuring the return value of useSession to get the isLoggedIn property from the returned object.
 
   async function handleLogout() {
     await logout();
