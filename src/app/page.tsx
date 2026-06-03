@@ -18,10 +18,6 @@ export default async function Home() {
         imageSrc={heroImg}
         imageAlt='Hero image'
       />
-      <div className="container flex flex-col border-4 rounded-xl">
-
-      <Card title="hello" description="I den her boks skal der være tekst" image={heroImg} imageAlt="flot billede smukke" href={"google.com"}></Card>
-      </div>
     </main>
   );
 }
