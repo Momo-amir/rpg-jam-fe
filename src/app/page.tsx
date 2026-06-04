@@ -1,6 +1,7 @@
 import Hero from "@/components/Hero";
 import heroImg from "@/public/hero.jpg";
 import { getSession } from "@/lib/session";
+import Card from "@/components/ui/card";
 
 export default async function Home() {
   const user = await getSession();
