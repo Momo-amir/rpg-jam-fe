@@ -30,6 +30,10 @@ export async function register(data: RegisterFormValues) {
 }
 
 export async function logout() {
-  await apiClient.post("/api/auth/logout");
-  useAuthStore.getState().clearUser();
+  const user = useAuthStore.getState().user;
+  try {
+    await apiClient.post("/api/logout", { email: user?.email });
+  } finally {
+    useAuthStore.getState().clearUser();
+  }
 }

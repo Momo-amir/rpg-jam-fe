@@ -50,11 +50,13 @@ apiClient.interceptors.response.use(
       error.message ??
       "Unexpected server error";
     const isRefreshRequest = originalRequest?.url === "/api/auth/refresh";
+    const isLogoutRequest = originalRequest?.url === "/api/logout";
 
     if (
       error.response?.status === 401 &&
       originalRequest &&
       !isRefreshRequest &&
+      !isLogoutRequest &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
