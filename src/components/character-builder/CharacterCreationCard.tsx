@@ -49,7 +49,7 @@ export function CharacterCreationCard({
             alt=''
             fill
             className={cn(
-              "object-cover  transition-transform duration-500 group-hover:scale-105",
+              "object-cover object-top  transition-transform duration-500 group-hover:scale-105",
               grayscale && "grayscale",
             )}
           />
