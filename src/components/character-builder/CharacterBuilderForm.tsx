@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, Shield, Sparkles, Wand2 } from "lucide-react";
+import Statbox, { Stats } from "@/components/ui/statbox";
 
 import { Button } from "@/components/ui/button";
 import { ChoiceModal } from "./ChoiceModal";
@@ -67,23 +68,22 @@ export function CharacterBuilderForm() {
         </p>
       </div>
 
-      <div className='grid grid-cols-6 gap-4'>
-        <div className='col-span-6 flex flex-col gap-4 md:col-span-4'>
-          {CHARACTER_SECTIONS.map((section) => (
-            <CharacterCreationCard
-              key={section.key}
-              label={section.label}
-              description={section.description}
-              icon={section.icon}
-              className='flex-1'
-              backgroundImage={section.placeholderImage}
-              onClick={() => setOpenModal(section.key)}
-            />
-          ))}
-        </div>
+      <div className='grid grid-cols-6 grid-rows-3 gap-4'>
+        {CHARACTER_SECTIONS.map((section) => (
+          <CharacterCreationCard
+            key={section.key}
+            label={section.label}
+            description={section.description}
+            icon={section.icon}
+            backgroundImage={section.placeholderImage}
+            onClick={() => setOpenModal(section.key)}
+            className='col-span-6 md:col-span-4 md:col-start-1'
+          />
+        ))}
 
-        <div className='col-span-6 grid grid-rows-[auto_auto_1fr_auto] gap-4 md:col-span-2'>
+        <div className='col-span-6 row-start-1 flex flex-col gap-3 md:col-span-2 md:col-start-5'>
           <CharacterDetailsCard
+            className='flex-1'
             name={name ?? ""}
             alignment={alignment}
             pronouns={pronouns}
@@ -104,27 +104,29 @@ export function CharacterBuilderForm() {
               label='Hit Points'
               description='How much damage you can take.'
               icon={<Heart size={20} />}
+              className='h-full'
             />
             <CharacterCreationCard
               label='Armor Class'
               description='How hard you are to hit.'
               icon={<Shield size={20} />}
+              className='h-full'
             />
           </div>
-
-          {/* TODO: replace with <AbilityScorePanel> when ready */}
-          <div className='flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-surface/60'>
-            <p className='text-helper font-medium uppercase tracking-wider text-neutraltwo'>
-              Ability Scores
-            </p>
-          </div>
-
-          <CharacterCreationCard
-            label='Proficiencies'
-            description='Proficiencies will appear here once you select a class and background.'
-            icon={<Sparkles size={20} />}
-          />
         </div>
+
+        <div className='col-span-6 row-start-2 grid grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
+          {Stats.map((stat) => (
+            <Statbox key={stat.id} shortname={stat.shortname} />
+          ))}
+        </div>
+
+        <CharacterCreationCard
+          label='Proficiencies'
+          description='Proficiencies will appear here once you select a class and background.'
+          icon={<Sparkles size={20} />}
+          className='col-span-6 row-start-3 md:col-span-2 md:col-start-5'
+        />
       </div>
 
       {CHARACTER_SECTIONS.map((section) => (

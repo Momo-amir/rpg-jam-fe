@@ -23,7 +23,14 @@ const ALIGNMENTS = [
   "Chaotic Evil",
 ];
 
-const PRONOUNS = ["He/Him", "She/Her", "They/Them", "He/They", "She/They", "Any/All"];
+const PRONOUNS = [
+  "He/Him",
+  "She/Her",
+  "They/Them",
+  "He/They",
+  "She/They",
+  "Any/All",
+];
 
 export function CharacterDetailsCard({
   name,
@@ -50,7 +57,7 @@ export function CharacterDetailsCard({
     <div
       style={style}
       className={cn(
-        "flex flex-col gap-3 rounded-xl border bg-surface/60 p-5 transition-all",
+        "flex flex-col gap-3 rounded-xl border bg-surface/60 p-4 transition-all",
         name ? "border-white/10" : "border-dashed border-white/10",
         className,
       )}
@@ -69,7 +76,10 @@ export function CharacterDetailsCard({
       {nameError && <p className='error-text'>{nameError}</p>}
 
       <div className='flex gap-2 border-t border-white/10 pt-3'>
-        <Select value={alignment ?? ""} onValueChange={(value) => value && onAlignmentChange(value)}>
+        <Select
+          value={alignment ?? ""}
+          onValueChange={(value) => value && onAlignmentChange(value)}
+        >
           <SelectTrigger size='sm' className='w-auto'>
             <SelectValue placeholder='Alignment' />
           </SelectTrigger>
@@ -84,7 +94,10 @@ export function CharacterDetailsCard({
           </SelectPopup>
         </Select>
 
-        <Select value={pronouns ?? ""} onValueChange={(value) => value && onPronounsChange(value)}>
+        <Select
+          value={pronouns ?? ""}
+          onValueChange={(value) => value && onPronounsChange(value)}
+        >
           <SelectTrigger size='sm' className='w-auto'>
             <SelectValue placeholder='Pronouns' />
           </SelectTrigger>
