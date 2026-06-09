@@ -57,7 +57,7 @@ export function CharacterDetailsCard({
     <div
       style={style}
       className={cn(
-        "flex flex-col gap-3 rounded-xl border bg-surface/60 p-5 transition-all",
+        "flex flex-col gap-3 rounded-xl border bg-surface/60 p-4 transition-all",
         name ? "border-white/10" : "border-dashed border-white/10",
         className,
       )}
