@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 type StatProps = {
   title: string;
   shortname: string;
@@ -14,25 +16,14 @@ export const Stats = [
   { id: 6, title: "Charisma", score: 18, shortname: "CHA", modifier: 4 },
 ];
 
-function StatList() {
-  return (
-    <ul>
-      {Stats.map((stat) => (
-        <li key={stat.id}>
-          {stat.title} is at {stat.score}, which equals to a {stat.modifier}{" "}
-          modifier.
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export default function Statbox({
   title,
   shortname,
   score,
   modifier,
 }: StatProps) {
+  const [scores, setScores] = useState(10);
+
   return (
     <div>
       <div className='flex justify-center flex-col items-center border-border border w-full p-4'>
@@ -43,7 +34,8 @@ export default function Statbox({
           className='w-fit px-4'
           min={1}
           max={20}
-          value={score}
+          onChange={(e) => setScores(parseInt(e.target.value))}
+          value={scores}
         ></input>
       </div>
     </div>
