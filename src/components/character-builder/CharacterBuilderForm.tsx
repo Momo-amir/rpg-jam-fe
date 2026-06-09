@@ -117,7 +117,7 @@ export function CharacterBuilderForm() {
 
         <div className='col-span-6 row-start-2 grid grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
           {Stats.map((stat) => (
-            <Statbox key={stat.id} shortname={stat.shortname} />
+            <Statbox key={stat.id} icon={stat.icon} shortname={stat.shortname} />
           ))}
         </div>
 
