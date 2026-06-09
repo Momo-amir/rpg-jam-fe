@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, Shield, Sparkles, Wand2 } from "lucide-react";
+import Statbox, { Stats } from "@/components/ui/statbox";
 
 import { Button } from "@/components/ui/button";
 import { ChoiceModal } from "./ChoiceModal";
@@ -82,7 +83,7 @@ export function CharacterBuilderForm() {
           ))}
         </div>
 
-        <div className='col-span-6 grid grid-rows-[auto_auto_1fr_auto] gap-4 md:col-span-2'>
+        <div className='col-span-6 grid gap-4 md:col-span-2'>
           <CharacterDetailsCard
             name={name ?? ""}
             alignment={alignment}
@@ -113,10 +114,15 @@ export function CharacterBuilderForm() {
           </div>
 
           {/* TODO: replace with <AbilityScorePanel> when ready */}
-          <div className='flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-surface/60'>
-            <p className='text-helper font-medium uppercase tracking-wider text-neutraltwo'>
-              Ability Scores
-            </p>
+          <div className='grid grid-cols-3 gap-2 items-center justify-center rounded-xl border border-dashed border-white/10 bg-surface/60'>
+            {Stats.map((stat) => (
+              <Statbox
+                key={stat.id}
+                shortname={stat.shortname}
+                score={stat.score}
+                modifier={stat.modifier}
+              />
+            ))}{" "}
           </div>
 
           <CharacterCreationCard

@@ -1,7 +1,6 @@
 import CardLayout from "@/components/Card";
 import { getSession } from "@/lib/session";
 import heroImage from "@/public/hero.jpg";
-import Statbox, { Stats} from "@/components/ui/statbox";
 
 const placeholderCards = [
   {
@@ -45,16 +44,7 @@ export default async function Dashboard() {
           <CardLayout cards={placeholderCards} />
         </div>
       </div>
-        <div className="flex flex-row gap-4 p-8 w-full">
-            {Stats.map(stat => (
-                <Statbox
-                    key={stat.id}
-                    shortname={stat.shortname}
-                    score={stat.score}
-                    modifier={stat.modifier}
-                />
-            ))}
-        </div>
+      <div className='flex flex-row gap-4 p-8 w-full'></div>
     </main>
   );
 }
