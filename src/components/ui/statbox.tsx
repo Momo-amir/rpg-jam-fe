@@ -1,42 +1,60 @@
+"use client";
+
 import { useState } from "react";
+import { Button } from "./button";
 
 type StatProps = {
-  title: string;
   shortname: string;
-  score: number;
-  modifier: number;
 };
 
 export const Stats = [
-  { id: 1, title: "Strength", shortname: "STR", score: 18, modifier: 4 },
-  { id: 2, title: "Agility", score: 18, shortname: "AGI", modifier: 4 },
-  { id: 3, title: "Constitution", score: 18, shortname: "CON", modifier: 4 },
-  { id: 4, title: "Wisdom", score: 18, shortname: "WIS", modifier: 4 },
-  { id: 5, title: "Intelligence", score: 18, shortname: "INT", modifier: 4 },
-  { id: 6, title: "Charisma", score: 18, shortname: "CHA", modifier: 4 },
+  { id: 1, title: "Strength", shortname: "STR" },
+  { id: 2, title: "Agility", shortname: "AGI" },
+  { id: 3, title: "Constitution", shortname: "CON" },
+  { id: 4, title: "Wisdom", shortname: "WIS" },
+  { id: 5, title: "Intelligence", shortname: "INT" },
+  { id: 6, title: "Charisma", shortname: "CHA" },
 ];
 
-export default function Statbox({
-  title,
-  shortname,
-  score,
-  modifier,
-}: StatProps) {
-  const [scores, setScores] = useState(10);
+export default function Statbox({ shortname }: StatProps) {
+  const [score, setScore] = useState(10);
+  const mod = Math.floor((score - 10) / 2);
+
+  function change(next: number) {
+    setScore(Math.min(20, Math.max(1, next)));
+  }
 
   return (
-    <div>
-      <div className='flex justify-center flex-col items-center border-border border w-full p-4'>
-        <h5>{shortname}</h5>
-        <h2>{modifier}</h2>
+    <div className='flex flex-col items-center border rounded-lg border-white/10 p-4 gap-2'>
+      <span className='text-sm font-semibold'>{shortname}</span>
+      <span className='text-3xl font-bold'>{mod >= 0 ? `+${mod}` : mod}</span>
+      <div className='flex items-center gap-2 px-2'>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => change(score - 1)}
+          disabled={score <= 1}
+          className={"w-4"}
+        >
+          −
+        </Button>
         <input
-          type='number'
-          className='w-fit px-4'
-          min={1}
-          max={20}
-          onChange={(e) => setScores(parseInt(e.target.value))}
-          value={scores}
-        ></input>
+          inputMode='numeric'
+          pattern='[0-9]*'
+          value={score}
+          onChange={(event) => change(parseInt(event.target.value) || 0)}
+          onFocus={(event) => event.target.select()}
+          className='w-12 text-center border border-border rounded-lg h-10 bg-transparent'
+        />
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => change(score + 1)}
+          disabled={score >= 20}
+          className={"w-4"}
+        >
+          +
+        </Button>
       </div>
     </div>
   );

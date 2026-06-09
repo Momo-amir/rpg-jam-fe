@@ -114,14 +114,9 @@ export function CharacterBuilderForm() {
           </div>
 
           {/* TODO: replace with <AbilityScorePanel> when ready */}
-          <div className='grid grid-cols-3 gap-2 items-center justify-center rounded-xl border border-dashed border-white/10 bg-surface/60'>
+          <div className='grid grid-cols-3 gap-2 items-center justify-center rounded-xl border  border-white/10 bg-surface/60'>
             {Stats.map((stat) => (
-              <Statbox
-                key={stat.id}
-                shortname={stat.shortname}
-                score={stat.score}
-                modifier={stat.modifier}
-              />
+              <Statbox key={stat.id} shortname={stat.shortname} />
             ))}{" "}
           </div>
 
