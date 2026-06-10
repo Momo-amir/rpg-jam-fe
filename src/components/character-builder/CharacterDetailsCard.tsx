@@ -75,7 +75,7 @@ export function CharacterDetailsCard({
       />
       {nameError && <p className='error-text'>{nameError}</p>}
 
-      <div className='flex gap-2 border-t border-white/10 pt-3'>
+      <div className='flex flex-col lg:flex-row gap-2 border-t border-white/10 pt-3'>
         <Select
           value={alignment ?? ""}
           onValueChange={(value) => value && onAlignmentChange(value)}

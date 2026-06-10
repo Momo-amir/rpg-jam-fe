@@ -99,7 +99,7 @@ export function CharacterBuilderForm() {
             }
           />
 
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='grid lg:grid-cols-2 gap-4'>
             <CharacterCreationCard
               label='Hit Points'
               description='How much damage you can take.'
@@ -115,7 +115,7 @@ export function CharacterBuilderForm() {
           </div>
         </div>
 
-        <div className='col-span-6 row-start-2 grid grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
+        <div className='col-span-6 row-start-2 grid grid-cols-2 lg:grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
           {Stats.map((stat) => (
             <Statbox key={stat.id} icon={stat.icon} shortname={stat.shortname} />
           ))}
