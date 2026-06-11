@@ -77,7 +77,7 @@ export function OptionCard({
         </p>
         {option.tags && option.tags.length > 0 && (
           <div className='mt-1 flex flex-wrap gap-1'>
-            {option.tags.map((tag) => (
+            {(Array.isArray(option.tags) ? option.tags : [option.tags]).map((tag) => (
               <Tag key={tag} label={tag} />
             ))}
           </div>

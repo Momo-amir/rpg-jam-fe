@@ -8,6 +8,7 @@ interface ChoiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  description?: string;
   options?: OptionItem[];
   numberOfChoices?: number;
   selected?: string | string[];
@@ -18,6 +19,7 @@ export function ChoiceModal({
   open,
   onOpenChange,
   title,
+  description,
   options,
   numberOfChoices = 1,
   selected,
@@ -26,7 +28,12 @@ export function ChoiceModal({
   const selectedMulti = Array.isArray(selected) ? selected : []; // best practice type guard - outer check only makes sure things are truthy this is to make sure we are certain about the type
   const selectedSingle = typeof selected === "string" ? selected : undefined;
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title={title}>
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+    >
       {options && options.length > 0 && onConfirm ? (
         numberOfChoices > 1 ? (
           <OptionCardList

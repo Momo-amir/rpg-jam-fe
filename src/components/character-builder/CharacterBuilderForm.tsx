@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, Shield, Sparkles, Wand2 } from "lucide-react";
@@ -8,16 +8,55 @@ import Statbox, { Stats } from "@/components/ui/statbox";
 
 import { Button } from "@/components/ui/button";
 import { ChoiceModal } from "./ChoiceModal";
+import { ChoiceTags } from "./ChoiceTags";
 import { CharacterCreationCard } from "./CharacterCreationCard";
 import { CharacterDetailsCard } from "./CharacterDetailsCard";
 import { CHARACTER_SECTIONS } from "./character-sections.config";
+import { normalizeChoices } from "./normalizeChoices";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
+import {
+  fetchClasses,
+  fetchSpecies,
+  fetchSpeciesById,
+  fetchBackgrounds,
+  fetchBackground,
+  fetchClass,
+} from "@/utils/api/character-options";
+import {
+  backgroundImages,
+  classImages,
+  speciesImages,
+} from "@/utils/api/character-images";
 import type {
   CharacterBuilderFormValues as FormValues,
-  CharacterSectionKey,
+  ClassListItem,
+  ClassTemplate,
+  SpeciesTemplate,
+  BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
 export function CharacterBuilderForm() {
+  const [classes, setClasses] = useState<ClassListItem[]>([]);
+  const [species, setSpecies] = useState<SpeciesTemplate[]>([]);
+  const [backgrounds, setBackgrounds] = useState<BackgroundTemplate[]>([]);
+  const [classTemplate, setClassTemplate] = useState<ClassTemplate | null>(
+    null,
+  );
+  const [speciesTemplate, setSpeciesTemplate] =
+    useState<SpeciesTemplate | null>(null);
+  const [backgroundTemplate, setBackgroundTemplate] =
+    useState<BackgroundTemplate | null>(null);
+
+  useEffect(() => {
+    Promise.all([fetchClasses(), fetchSpecies(), fetchBackgrounds()]).then(
+      ([fetchedClasses, fetchedSpecies, fetchedBackgrounds]) => {
+        setClasses(fetchedClasses);
+        setSpecies(fetchedSpecies);
+        setBackgrounds(fetchedBackgrounds);
+      },
+    );
+  }, []);
+
   const {
     control,
     setValue,
@@ -47,12 +86,105 @@ export function CharacterBuilderForm() {
     },
   });
 
-  const [name, alignment, pronouns] = useWatch({
-    control,
-    name: ["name", "alignment", "pronouns"],
-  });
+  const [name, alignment, pronouns, classId, speciesId, backgroundId] =
+    useWatch({
+      control,
+      name: [
+        "name",
+        "alignment",
+        "pronouns",
+        "classId",
+        "speciesId",
+        "backgroundId",
+      ],
+    });
 
-  const [openModal, setOpenModal] = useState<CharacterSectionKey | null>(null);
+  const choices = useWatch({ control, name: "choices" });
+
+  useEffect(() => {
+    if (!classId) return;
+    fetchClass(classId).then(setClassTemplate);
+  }, [classId]);
+
+  useEffect(() => {
+    if (!speciesId) return;
+    fetchSpeciesById(speciesId).then(setSpeciesTemplate);
+  }, [speciesId]);
+
+  useEffect(() => {
+    if (!backgroundId) return;
+    fetchBackground(backgroundId).then(setBackgroundTemplate);
+  }, [backgroundId]);
+
+  const [openModal, setOpenModal] = useState<string | null>(null);
+
+  const sections = CHARACTER_SECTIONS.map((section) => {
+    const templateByKey = {
+      class: classTemplate,
+      species: speciesTemplate,
+      background: backgroundTemplate,
+    };
+    const selectedIdByKey = {
+      class: classId,
+      species: speciesId,
+      background: backgroundId,
+    };
+    const listByKey = {
+      class: classes.map((playableClass) => ({
+        id: playableClass.id,
+        name: playableClass.name,
+        description: playableClass.description,
+        image: classImages[playableClass.id],
+        tags: [
+          ...(playableClass.hitDie ? [`D` + playableClass.hitDie] : []),
+          ...(playableClass.primaryAbilities ?? []),
+          ...(playableClass.armorTraining ?? []),
+        ],
+      })),
+      species: species.map((playableSpecies) => ({
+        id: playableSpecies.id,
+        name: playableSpecies.name,
+        description: playableSpecies.type ?? "",
+        image: speciesImages[playableSpecies.id],
+        tags:
+          playableSpecies.choices?.[0]?.specialTraits?.map(
+            (trait) => trait.name,
+          ) ?? [],
+      })),
+      background: backgrounds.map((background) => ({
+        id: background.id,
+        name: background.name,
+        description: background.description ?? "",
+        tags: [
+          ...(background.feat ? [background.feat] : []),
+          ...(background.skillProficiencies ?? []),
+          ...(background.abilityScores ?? []),
+        ],
+        image: backgroundImages[background.id],
+      })),
+    };
+    const fieldByKey = {
+      class: "classId",
+      species: "speciesId",
+      background: "backgroundId",
+    } as const;
+
+    const template = templateByKey[section.key];
+    const selectedId = selectedIdByKey[section.key] ?? "";
+    const list = listByKey[section.key];
+    const selectedName = list.find((item) => item.id === selectedId)?.name;
+    const selectedImage = list.find((item) => item.id === selectedId)?.image;
+
+    return {
+      ...section,
+      list,
+      selectedId,
+      selectedName,
+      selectedImage,
+      field: fieldByKey[section.key],
+      choices: template ? normalizeChoices(template) : [],
+    };
+  });
 
   function onSubmit(data: FormValues) {
     console.log("Character form submit:", data);
@@ -69,16 +201,28 @@ export function CharacterBuilderForm() {
       </div>
 
       <div className='grid grid-cols-6 grid-rows-3 gap-4'>
-        {CHARACTER_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <CharacterCreationCard
             key={section.key}
             label={section.label}
             description={section.description}
             icon={section.icon}
-            backgroundImage={section.placeholderImage}
+            backgroundImage={section.selectedImage ?? section.placeholderImage}
+            grayscale={!section.selectedImage}
+            displayValue={section.selectedName}
             onClick={() => setOpenModal(section.key)}
             className='col-span-6 md:col-span-4 md:col-start-1'
-          />
+          >
+            {section.choices.length > 0 && (
+              <ChoiceTags
+                choices={section.choices}
+                selected={choices}
+                onChoiceConfirm={(key, value) =>
+                  setValue(`choices.${key}`, value, { shouldValidate: true })
+                }
+              />
+            )}
+          </CharacterCreationCard>
         ))}
 
         <div className='col-span-6 row-start-1 flex flex-col gap-3 md:col-span-2 md:col-start-5'>
@@ -117,7 +261,11 @@ export function CharacterBuilderForm() {
 
         <div className='col-span-6 row-start-2 grid grid-cols-2 lg:grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
           {Stats.map((stat) => (
-            <Statbox key={stat.id} icon={stat.icon} shortname={stat.shortname} />
+            <Statbox
+              key={stat.id}
+              icon={stat.icon}
+              shortname={stat.shortname}
+            />
           ))}
         </div>
 
@@ -129,12 +277,19 @@ export function CharacterBuilderForm() {
         />
       </div>
 
-      {CHARACTER_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <ChoiceModal
           key={section.key}
           open={openModal === section.key}
           onOpenChange={(open) => setOpenModal(open ? section.key : null)}
           title={section.modalTitle}
+          options={section.list}
+          numberOfChoices={1}
+          selected={section.selectedId || undefined}
+          onConfirm={(value) => {
+            setValue(section.field, value as string, { shouldValidate: true });
+            setOpenModal(null);
+          }}
         />
       ))}
 

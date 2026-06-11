@@ -17,7 +17,7 @@ A D&D/TTRPG platform for character building, party management, session schedulin
 | Auth | No auth library | C# ASP.NET Core Identity owns users, passwords, roles, and the OAuth dance. `jose` decodes the JWT locally — no network call on route changes. Zustand holds the decoded user on the client |
 | Auth store | Zustand | Holds decoded user payload only — never the token. Token stays in the HttpOnly cookie |
 | Forms | React Hook Form + Zod | RHF for all forms. Zod schemas in `src/types/` are the source of truth for both validation and TypeScript types |
-| Data fetching | Server Components + TanStack Query | Server Components for initial loads; TanStack Query for client-side data and mutations |
+| Data fetching | Server Components + Axios | Server Components for initial loads; direct Axios calls for client-side mutations |
 | API client | Axios instance in `src/utils/api/client.ts` | `withCredentials: true` — sends HttpOnly cookie automatically. 401 interceptor handles token refresh |
 | Testing | Vitest + React Testing Library + Playwright | Vitest over Jest — better ESM + Vite compatibility with Next.js 16 |
 | Icons | Lucide React | |
@@ -62,7 +62,7 @@ src/
 │   └── auth.ts                 # Zustand store — holds decoded User payload, never the token
 │
 ├── providers/
-│   ├── QueryProvider.tsx       # TanStack Query client wrapper
+│   ├── QueryProvider.tsx       # (deprecated — do not use)
 │   └── ThemeProvider.tsx
 │
 ├── hooks/
@@ -167,7 +167,7 @@ C# is the only real security boundary. Everything in Next.js is UX — fast redi
 
 ### Server vs Client Components
 - Default to Server Components. Add `"use client"` only when you need interactivity.
-- Never fetch data in Client Components directly — pass it from Server Components or use TanStack Query.
+- Never fetch data in Client Components directly — pass it from Server Components as props, or call Axios functions in event handlers (auth flow pattern).
 - All files in `src/lib/` must have `import 'server-only'` at the top. Build error if accidentally imported client-side.
 
 ### API Client
@@ -273,7 +273,7 @@ No other secrets belong here. OAuth credentials and JWT signing live in C# confi
 - Do not call `GET /api/auth/me` on every render — decode the JWT locally with jose
 - Do not compute D&D stats or modifiers on the frontend — backend's job
 - Do not use the Pages Router — App Router only
-- Do not fetch in `useEffect` — use Server Components or TanStack Query
+- Do not fetch in `useEffect` — use Server Components for initial data, or Axios calls in event handlers for client-side fetches
 - Do not put secrets in `NEXT_PUBLIC_*` env vars
 - Do not use `any` in TypeScript without a comment explaining why
 - Do not write plain TypeScript interfaces for API shapes — write a Zod schema and infer the type

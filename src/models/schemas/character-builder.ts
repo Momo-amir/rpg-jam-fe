@@ -78,38 +78,109 @@ export const weaponMasteryTypeSchema = z.enum([
 
 export const skillChoiceSchema = z.object({
   numberOfChoices: z.number(),
-  options: z.array(skillSchema),
+  options: z.array(z.string()),
 });
 
-const fightingStyleChoiceSchema = z.object({
-  type: z.literal("FightingStyle"),
+const equipmentOptionSchema = z.object({
   label: z.string(),
-  numberOfChoices: z.number(),
-  options: z.array(fightingStyleTypeSchema),
+  optionGroup: z.array(z.string()),
 });
 
-const weaponMasteryChoiceSchema = z.object({
-  type: z.literal("WeaponMastery"),
-  label: z.string(),
+const startingEquipmentSchema = z.object({
   numberOfChoices: z.number(),
-  options: z.array(weaponMasteryTypeSchema),
+  options: z.array(equipmentOptionSchema),
 });
 
-export const classChoiceSchema = z.discriminatedUnion("type", [
-  fightingStyleChoiceSchema,
-  weaponMasteryChoiceSchema,
-]);
+const classFeatureSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  numberOfChoices: z.number(),
+  options: z.union([z.array(z.unknown()), z.string()]).optional(),
+});
+
+export const classChoiceSchema = z.object({
+  skillProficiencies: skillChoiceSchema,
+  startingEquipment: startingEquipmentSchema,
+  classFeatures: z.array(classFeatureSchema),
+});
 
 export const classTemplateSchema = z.object({
   id: z.string(),
   name: z.string(),
-  hitDice: diceTypeSchema,
-  primaryAbilities: z.array(abilitySchema),
-  savingThrow: z.array(abilitySchema),
-  skillChoice: skillChoiceSchema,
-  classChoice: z.array(classChoiceSchema),
-  weaponSkill: z.array(weaponProficiencySchema),
-  armorSkill: z.array(armorProficiencySchema),
+  description: z.string(),
+  hitDie: z.number(),
+  primaryAbilities: z.array(z.string()),
+  savingThrowProficiencies: z.array(z.string()),
+  weaponProficiencies: z.array(z.string()),
+  armorTraining: z.array(z.string()),
+  choices: z.array(classChoiceSchema),
+});
+
+export const classListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  hitDie: z.number(),
+  primaryAbilities: z.array(z.string()),
+  armorTraining: z.array(z.string()),
+});
+
+// ─── Species schemas ──────────────────────────────────────────────────────────
+
+const specialTraitSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  numberOfChoices: z.number(),
+  options: z.array(z.string()),
+});
+
+const speciesChoiceSchema = z.object({
+  size: z.object({
+    numberOfChoices: z.number(),
+    options: z.array(z.string()),
+  }),
+  specialTraits: z.array(specialTraitSchema),
+});
+
+export const speciesTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.string().optional(),
+  speed: z.string().optional(),
+  choices: z.array(speciesChoiceSchema).optional(),
+});
+
+// ─── Background schemas ───────────────────────────────────────────────────────
+
+const backgroundEquipmentOptionSchema = z.object({
+  label: z.string(),
+  optionGroup: z.array(z.string()),
+});
+
+const backgroundChoiceSchema = z.object({
+  toolProficiency: z
+    .object({
+      numberOfChoices: z.number(),
+      options: z.array(z.string()),
+    })
+    .optional(),
+  startingEquipment: z
+    .object({
+      numberOfChoices: z.number(),
+      options: z.array(backgroundEquipmentOptionSchema),
+    })
+    .optional(),
+});
+
+export const backgroundTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  abilityScores: z.array(z.string()).optional(),
+  feat: z.string().optional(),
+  skillProficiencies: z.array(z.string()).optional(),
+  choices: z.array(backgroundChoiceSchema).optional(),
 });
 
 // ─── Character builder form ───────────────────────────────────────────────────
@@ -136,4 +207,3 @@ export const characterBuilderSchema = z.object({
   pronouns: z.string().optional(),
   portraitUrl: z.string().optional(),
 });
-
