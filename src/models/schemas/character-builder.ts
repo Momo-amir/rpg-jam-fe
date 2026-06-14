@@ -51,29 +51,6 @@ export const diceTypeSchema = z.enum([
   "D100",
 ]);
 
-// ─── Class choice sub-types ───────────────────────────────────────────────────
-
-export const fightingStyleTypeSchema = z.enum([
-  "Archery",
-  "Defense",
-  "Dueling",
-  "GreatWeaponFighting",
-  "Protection",
-  "TwoWeaponFighting",
-]);
-
-export const weaponMasteryTypeSchema = z.enum([
-  "Longsword",
-  "Shortsword",
-  "Greatsword",
-  "Quarterstaff",
-  "Battleaxe",
-  "Warhammer",
-  "Handaxe",
-  "LightCrossbow",
-  "Longbow",
-]);
-
 // ─── API response shapes ──────────────────────────────────────────────────────
 
 export const skillChoiceSchema = z.object({
@@ -81,74 +58,80 @@ export const skillChoiceSchema = z.object({
   options: z.array(z.string()),
 });
 
-const equipmentOptionSchema = z.object({
+const groupIdSchema = z.object({ value: z.string() });
+
+const groupContentSchema = z.object({
+  id: groupIdSchema,
+  type: z.string(),
+  quantity: z.number(),
+  referenceKey: z.string(),
+});
+
+const choiceGroupSchema = z.object({
+  id: groupIdSchema,
   label: z.string(),
-  optionGroup: z.array(z.string()),
+  groupContents: z.array(groupContentSchema),
 });
 
-const startingEquipmentSchema = z.object({
+const choiceDetailSchema = z.object({
+  id: groupIdSchema,
   numberOfChoices: z.number(),
-  options: z.array(equipmentOptionSchema),
-});
-
-const classFeatureSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  numberOfChoices: z.number(),
-  options: z.union([z.array(z.unknown()), z.string()]).optional(),
+  choiceGroups: z.array(choiceGroupSchema),
 });
 
 export const classChoiceSchema = z.object({
-  skillProficiencies: skillChoiceSchema,
-  startingEquipment: startingEquipmentSchema,
-  classFeatures: z.array(classFeatureSchema),
+  label: z.string(),
+  choice: choiceDetailSchema,
+});
+
+const classFeatureSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  levelRequirement: z.number(),
+  description: z.string(),
+  choice: choiceDetailSchema.nullable(),
 });
 
 export const classTemplateSchema = z.object({
-  id: z.string(),
+  key: z.string(),
   name: z.string(),
   description: z.string(),
-  hitDie: z.number(),
+  hitDie: diceTypeSchema,
   primaryAbilities: z.array(z.string()),
-  savingThrowProficiencies: z.array(z.string()),
-  weaponProficiencies: z.array(z.string()),
+  savingThrow: z.array(z.string()).optional(),
+  weaponProficiency: z.array(z.string()),
   armorTraining: z.array(z.string()),
-  choices: z.array(classChoiceSchema),
+  classFeatures: z.array(classFeatureSchema).optional(),
+  choices: z.array(classChoiceSchema).optional(),
 });
 
 export const classListItemSchema = z.object({
-  id: z.string(),
+  key: z.string(),
   name: z.string(),
   description: z.string(),
-  hitDie: z.number(),
+  hitDie: diceTypeSchema,
   primaryAbilities: z.array(z.string()),
+  weaponProficiency: z.array(z.string()),
   armorTraining: z.array(z.string()),
 });
 
 // ─── Species schemas ──────────────────────────────────────────────────────────
 
-const specialTraitSchema = z.object({
+export const speciesListItemSchema = z.object({
+  key: z.string(),
   name: z.string(),
-  description: z.string(),
-  numberOfChoices: z.number(),
-  options: z.array(z.string()),
-});
-
-const speciesChoiceSchema = z.object({
-  size: z.object({
-    numberOfChoices: z.number(),
-    options: z.array(z.string()),
-  }),
-  specialTraits: z.array(specialTraitSchema),
+  creatureType: z.string().optional(),
+  traits: z.array(z.string()).optional(),
 });
 
 export const speciesTemplateSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
+  key: z.string(),
   name: z.string(),
-  type: z.string().optional(),
-  speed: z.string().optional(),
-  choices: z.array(speciesChoiceSchema).optional(),
+  creatureType: z.string().optional(),
+  speed: z.number().optional(),
+  traits: z.array(z.string()).optional(),
+  choices: z.array(classChoiceSchema).optional(),
 });
 
 // ─── Background schemas ───────────────────────────────────────────────────────

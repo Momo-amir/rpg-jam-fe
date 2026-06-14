@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "./button";
 import { LucideIcon } from 'lucide-react';
 import { BicepsFlexed, BowArrow, Bone, Brain, BookOpenText, MessageCircleHeart } from "lucide-react";
@@ -8,23 +7,25 @@ import { BicepsFlexed, BowArrow, Bone, Brain, BookOpenText, MessageCircleHeart }
 type StatProps = {
   shortname: string;
   icon: LucideIcon;
+  value: number;
+  onChange: (value: number) => void;
 };
 
-export const Stats = [
-  { id: 1, title: "Strength", shortname: "STR", icon: BicepsFlexed },
-  { id: 2, title: "Dexterity", shortname: "DEX", icon: BowArrow },
-  { id: 3, title: "Constitution", shortname: "CON", icon: Bone },
-  { id: 4, title: "Wisdom", shortname: "WIS", icon: Brain },
-  { id: 5, title: "Intelligence", shortname: "INT", icon: BookOpenText },
-  { id: 6, title: "Charisma", shortname: "CHA", icon: MessageCircleHeart },
+export const Stats: { id: number; title: string; shortname: string; icon: LucideIcon; field: string }[] = [
+  { id: 1, title: "Strength",     shortname: "STR", icon: BicepsFlexed,     field: "strength"     },
+  { id: 2, title: "Dexterity",    shortname: "DEX", icon: BowArrow,         field: "dexterity"    },
+  { id: 3, title: "Constitution", shortname: "CON", icon: Bone,             field: "constitution" },
+  { id: 4, title: "Wisdom",       shortname: "WIS", icon: Brain,            field: "wisdom"       },
+  { id: 5, title: "Intelligence", shortname: "INT", icon: BookOpenText,     field: "intelligence" },
+  { id: 6, title: "Charisma",     shortname: "CHA", icon: MessageCircleHeart, field: "charisma"   },
 ];
 
-export default function Statbox({ shortname, icon: Icon }: StatProps) {
-  const [score, setScore] = useState(10);
+export default function Statbox({ shortname, icon: Icon, value, onChange }: StatProps) {
+  const score = value;
   const mod = Math.floor((score - 10) / 2);
 
   function change(next: number) {
-    setScore(Math.min(20, Math.max(1, next)));
+    onChange(Math.min(20, Math.max(1, next)));
   }
 
   return (

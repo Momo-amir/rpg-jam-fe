@@ -145,6 +145,88 @@ The JSX maps over this once for the cards and once for the modals — no per-sec
 
 ---
 
+## Ticket: Wire up derived HP and AC cards
+
+**Goal:** Make the Hit Points and Armor Class cards show real values that react to the user's class selection and ability scores.
+
+**Background:** At level 1 in D&D 5e, HP equals the class's hit die maximum plus the character's Constitution modifier. AC (unarmored) equals 10 plus the Dexterity modifier. The ability modifier formula is `Math.floor((score - 10) / 2)` — a score of 10 gives +0, 12 gives +1, 8 gives -1, and so on.
+
+All the data you need is already in the form. `classTemplate` (from `useState`) holds the fetched class including `hitDie`. The ability scores live in the form under `abilityScores.constitution` and `abilityScores.dexterity`. The trick is making the component re-render when those scores change — that's what `useWatch` is for.
+
+---
+
+### Step 1 — Watch the ability scores
+
+Open [CharacterBuilderForm.tsx](../src/components/character-builder/CharacterBuilderForm.tsx).
+
+Find where the other `useWatch` calls are (around line 89). Add one more underneath them:
+
+```ts
+const abilityScores = useWatch({ control, name: "abilityScores" });
+```
+
+`useWatch` subscribes the component to changes in that field. Without it, React won't re-render when scores change, so your derived values would be stale.
+
+---
+
+### Step 2 — Derive the modifier values
+
+Below your `useWatch` calls, but before the JSX `return`, add these two lines:
+
+```ts
+const conMod = Math.floor(((abilityScores?.constitution ?? 10) - 10) / 2);
+const dexMod = Math.floor(((abilityScores?.dexterity ?? 10) - 10) / 2);
+```
+
+The `?.` is optional chaining — safe if `abilityScores` is undefined on first render. The `?? 10` is a nullish coalescing fallback — if the value is null or undefined, use 10 (the neutral score that gives a +0 modifier).
+
+---
+
+### Step 3 — Derive HP and AC
+
+Directly below step 2, add:
+
+```ts
+const derivedHp = classTemplate ? classTemplate.hitDie + conMod : null;
+const derivedAc = 10 + dexMod;
+```
+
+`classTemplate` is null until the user picks a class. The ternary handles that — `null` means "not ready yet". AC always has a value because 10 + DEX modifier is always valid.
+
+---
+
+### Step 4 — Use the values in the cards
+
+Find the two `CharacterCreationCard` components with `label='Hit Points'` and `label='Armor Class'` (around line 252). Update their `description` props:
+
+```tsx
+<CharacterCreationCard
+  label='Hit Points'
+  description={derivedHp !== null ? `${derivedHp} HP` : "Choose a class first"}
+  icon={<Heart size={20} />}
+  className='h-full'
+/>
+<CharacterCreationCard
+  label='Armor Class'
+  description={`${derivedAc} AC`}
+  icon={<Shield size={20} />}
+  className='h-full'
+/>
+```
+
+Template literals (the backtick strings) let you embed the number directly into the display string.
+
+---
+
+### How to verify it works
+
+1. Run the dev server and open `/characters/new`
+2. Before selecting a class, the HP card should say "Choose a class first" and AC should say "10 AC"
+3. Select a class — HP should update to the hit die value (e.g. Fighter shows 10, Wizard shows 6)
+4. Once ability score inputs are wired up, changing CON or DEX should update the numbers live
+
+---
+
 ## Adding a new class/species/background
 
 1. C# team adds it to the API — no frontend schema changes needed if the shape matches.

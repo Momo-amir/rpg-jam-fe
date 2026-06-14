@@ -3,48 +3,42 @@ import { z } from "zod";
 import {
   classListItemSchema,
   classTemplateSchema,
+  speciesListItemSchema,
   speciesTemplateSchema,
   backgroundTemplateSchema,
 } from "@/models/schemas/character-builder";
 import type {
   ClassListItem,
   ClassTemplate,
+  SpeciesListItem,
   SpeciesTemplate,
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
 export async function fetchClasses(): Promise<ClassListItem[]> {
-  const response = await apiClient.get("/api/getclasses");
-  return z
-    .array(classListItemSchema)
-    .parse(response.data.classes ?? response.data);
+  const response = await apiClient.get("/api/classes/all");
+  const raw = response.data.classes ?? response.data;
+  const result = z.array(classListItemSchema).safeParse(raw);
+  if (!result.success) {
+    console.error("[fetchClasses] parse error", result.error.flatten(), raw);
+    throw result.error;
+  }
+  return result.data;
 }
 
-export async function fetchClass(id: string): Promise<ClassTemplate> {
-  const response = await apiClient.get("/api/getclasses");
-  const classes = z
-    .array(classTemplateSchema)
-    .parse(response.data.classes ?? response.data);
-  const found = classes.find((c) => c.id === id);
-  if (!found) throw new Error(`Class not found: ${id}`);
-  return found;
+export async function fetchClass(key: string): Promise<ClassTemplate> {
+  const response = await apiClient.get(`/api/classes/${key}`);
+  return classTemplateSchema.parse(response.data);
 }
 
-export async function fetchSpecies(): Promise<SpeciesTemplate[]> {
-  const response = await apiClient.get("/api/getspecies");
-  return z
-    .array(speciesTemplateSchema)
-    .parse(response.data.species ?? response.data);
+export async function fetchSpecies(): Promise<SpeciesListItem[]> {
+  const response = await apiClient.get("/api/species/all");
+  return z.array(speciesListItemSchema).parse(response.data.classes ?? response.data);
 }
 
-export async function fetchSpeciesById(id: string): Promise<SpeciesTemplate> {
-  const response = await apiClient.get("/api/getspecies");
-  const species = z
-    .array(speciesTemplateSchema)
-    .parse(response.data.species ?? response.data);
-  const found = species.find((s) => s.id === id);
-  if (!found) throw new Error(`Species not found: ${id}`);
-  return found;
+export async function fetchSpeciesByKey(key: string): Promise<SpeciesTemplate> {
+  const response = await apiClient.get(`/api/species/${key}`);
+  return speciesTemplateSchema.parse(response.data);
 }
 
 export async function fetchBackgrounds(): Promise<BackgroundTemplate[]> {

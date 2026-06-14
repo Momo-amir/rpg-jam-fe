@@ -7,6 +7,7 @@ import type {
   classListItemSchema,
   classChoiceSchema,
   skillChoiceSchema,
+  speciesListItemSchema,
   speciesTemplateSchema,
   backgroundTemplateSchema,
 } from "@/models/schemas/character-builder";
@@ -22,6 +23,7 @@ export type ClassTemplate = z.infer<typeof classTemplateSchema>;
 export type ClassListItem = z.infer<typeof classListItemSchema>;
 export type ClassChoice = z.infer<typeof classChoiceSchema>;
 export type SkillChoice = z.infer<typeof skillChoiceSchema>;
+export type SpeciesListItem = z.infer<typeof speciesListItemSchema>;
 export type SpeciesTemplate = z.infer<typeof speciesTemplateSchema>;
 export type BackgroundTemplate = z.infer<typeof backgroundTemplateSchema>;
 

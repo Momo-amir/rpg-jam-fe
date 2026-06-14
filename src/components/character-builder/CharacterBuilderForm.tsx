@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Heart, Shield, Sparkles, Wand2 } from "lucide-react";
+import { Heart, Shield, Wand2 } from "lucide-react";
 import Statbox, { Stats } from "@/components/ui/statbox";
 
 import { Button } from "@/components/ui/button";
@@ -11,33 +11,43 @@ import { ChoiceModal } from "./ChoiceModal";
 import { ChoiceTags } from "./ChoiceTags";
 import { CharacterCreationCard } from "./CharacterCreationCard";
 import { CharacterDetailsCard } from "./CharacterDetailsCard";
-import { CHARACTER_SECTIONS } from "./character-sections.config";
-import { normalizeChoices } from "./normalizeChoices";
+import { ProficienciesPanel } from "./ProficienciesPanel";
+import {
+  CHARACTER_SECTIONS,
+  FIELD_BY_KEY,
+  mapClass,
+  mapSpecies,
+  mapBackground,
+} from "./character-sections.config";
+import { normalizeClassChoices, normalizeSpeciesChoices } from "./normalizeChoices";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
 import {
   fetchClasses,
   fetchSpecies,
-  fetchSpeciesById,
+  fetchSpeciesByKey,
   fetchBackgrounds,
   fetchBackground,
   fetchClass,
 } from "@/utils/api/character-options";
-import {
-  backgroundImages,
-  classImages,
-  speciesImages,
-} from "@/utils/api/character-images";
 import type {
   CharacterBuilderFormValues as FormValues,
   ClassListItem,
   ClassTemplate,
+  SpeciesListItem,
   SpeciesTemplate,
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
+function deriveAc(armorTraining: string[], dexMod: number): number {
+  if (armorTraining.includes("Heavy")) return 16;
+  if (armorTraining.includes("Medium")) return 13 + Math.min(dexMod, 2);
+  if (armorTraining.includes("Light")) return 11 + dexMod;
+  return 10 + dexMod;
+}
+
 export function CharacterBuilderForm() {
   const [classes, setClasses] = useState<ClassListItem[]>([]);
-  const [species, setSpecies] = useState<SpeciesTemplate[]>([]);
+  const [species, setSpecies] = useState<SpeciesListItem[]>([]);
   const [backgrounds, setBackgrounds] = useState<BackgroundTemplate[]>([]);
   const [classTemplate, setClassTemplate] = useState<ClassTemplate | null>(
     null,
@@ -48,13 +58,9 @@ export function CharacterBuilderForm() {
     useState<BackgroundTemplate | null>(null);
 
   useEffect(() => {
-    Promise.all([fetchClasses(), fetchSpecies(), fetchBackgrounds()]).then(
-      ([fetchedClasses, fetchedSpecies, fetchedBackgrounds]) => {
-        setClasses(fetchedClasses);
-        setSpecies(fetchedSpecies);
-        setBackgrounds(fetchedBackgrounds);
-      },
-    );
+    fetchClasses().then(setClasses).catch(console.error);
+    fetchSpecies().then(setSpecies).catch(console.error);
+    fetchBackgrounds().then(setBackgrounds).catch(console.error);
   }, []);
 
   const {
@@ -100,6 +106,15 @@ export function CharacterBuilderForm() {
     });
 
   const choices = useWatch({ control, name: "choices" });
+  const abilityScores = useWatch({ control, name: "abilityScores" });
+
+  const conMod = Math.floor(((abilityScores?.constitution ?? 10) - 10) / 2);
+  const dexMod = Math.floor(((abilityScores?.dexterity ?? 10) - 10) / 2);
+
+  const derivedHp = classTemplate
+    ? parseInt(classTemplate.hitDie.slice(1), 10) + conMod
+    : null;
+  const derivedAc = deriveAc(classTemplate?.armorTraining ?? [], dexMod);
 
   useEffect(() => {
     if (!classId) return;
@@ -108,7 +123,7 @@ export function CharacterBuilderForm() {
 
   useEffect(() => {
     if (!speciesId) return;
-    fetchSpeciesById(speciesId).then(setSpeciesTemplate);
+    fetchSpeciesByKey(speciesId).then(setSpeciesTemplate);
   }, [speciesId]);
 
   useEffect(() => {
@@ -119,57 +134,17 @@ export function CharacterBuilderForm() {
   const [openModal, setOpenModal] = useState<string | null>(null);
 
   const sections = CHARACTER_SECTIONS.map((section) => {
-    const templateByKey = {
-      class: classTemplate,
-      species: speciesTemplate,
-      background: backgroundTemplate,
-    };
     const selectedIdByKey = {
       class: classId,
       species: speciesId,
       background: backgroundId,
     };
     const listByKey = {
-      class: classes.map((playableClass) => ({
-        id: playableClass.id,
-        name: playableClass.name,
-        description: playableClass.description,
-        image: classImages[playableClass.id],
-        tags: [
-          ...(playableClass.hitDie ? [`D` + playableClass.hitDie] : []),
-          ...(playableClass.primaryAbilities ?? []),
-          ...(playableClass.armorTraining ?? []),
-        ],
-      })),
-      species: species.map((playableSpecies) => ({
-        id: playableSpecies.id,
-        name: playableSpecies.name,
-        description: playableSpecies.type ?? "",
-        image: speciesImages[playableSpecies.id],
-        tags:
-          playableSpecies.choices?.[0]?.specialTraits?.map(
-            (trait) => trait.name,
-          ) ?? [],
-      })),
-      background: backgrounds.map((background) => ({
-        id: background.id,
-        name: background.name,
-        description: background.description ?? "",
-        tags: [
-          ...(background.feat ? [background.feat] : []),
-          ...(background.skillProficiencies ?? []),
-          ...(background.abilityScores ?? []),
-        ],
-        image: backgroundImages[background.id],
-      })),
+      class: classes.map(mapClass),
+      species: species.map(mapSpecies),
+      background: backgrounds.map(mapBackground),
     };
-    const fieldByKey = {
-      class: "classId",
-      species: "speciesId",
-      background: "backgroundId",
-    } as const;
 
-    const template = templateByKey[section.key];
     const selectedId = selectedIdByKey[section.key] ?? "";
     const list = listByKey[section.key];
     const selectedName = list.find((item) => item.id === selectedId)?.name;
@@ -181,8 +156,13 @@ export function CharacterBuilderForm() {
       selectedId,
       selectedName,
       selectedImage,
-      field: fieldByKey[section.key],
-      choices: template ? normalizeChoices(template) : [],
+      field: FIELD_BY_KEY[section.key],
+      choices:
+        section.key === "class" && classTemplate
+          ? normalizeClassChoices(classTemplate)
+          : section.key === "species" && speciesTemplate
+            ? normalizeSpeciesChoices(speciesTemplate)
+            : [],
     };
   });
 
@@ -246,13 +226,15 @@ export function CharacterBuilderForm() {
           <div className='grid lg:grid-cols-2 gap-4'>
             <CharacterCreationCard
               label='Hit Points'
-              description='How much damage you can take.'
+              description={
+                derivedHp !== null ? `${derivedHp} HP` : "Choose a class"
+              }
               icon={<Heart size={20} />}
               className='h-full'
             />
             <CharacterCreationCard
               label='Armor Class'
-              description='How hard you are to hit.'
+              description={`${derivedAc} AC`}
               icon={<Shield size={20} />}
               className='h-full'
             />
@@ -265,15 +247,19 @@ export function CharacterBuilderForm() {
               key={stat.id}
               icon={stat.icon}
               shortname={stat.shortname}
+              value={abilityScores?.[stat.field as keyof typeof abilityScores] ?? 10}
+              onChange={(value) =>
+                setValue(`abilityScores.${stat.field as keyof typeof abilityScores}`, value, { shouldValidate: true })
+              }
             />
           ))}
         </div>
 
-        <CharacterCreationCard
-          label='Proficiencies'
-          description='Proficiencies will appear here once you select a class and background.'
-          icon={<Sparkles size={20} />}
-          className='col-span-6 row-start-3 md:col-span-2 md:col-start-5'
+        <ProficienciesPanel
+          classTemplate={classTemplate}
+          speciesTemplate={speciesTemplate}
+          backgroundTemplate={backgroundTemplate}
+          choices={choices ?? {}}
         />
       </div>
 

@@ -1,9 +1,63 @@
 import { Sword, User, BookOpen } from "lucide-react";
 
-import type { CharacterSectionConfig } from "@/models/types/character-builder.types";
+import type {
+  CharacterSectionConfig,
+  ClassListItem,
+  SpeciesListItem as SpeciesTemplate,
+  BackgroundTemplate,
+} from "@/models/types/character-builder.types";
+import {
+  classImages,
+  speciesImages,
+  backgroundImages,
+} from "@/utils/api/character-images";
 import bardImage from "@/public/assets/bard.png";
 import humanImage from "@/public/assets/human.png";
 import soldierImage from "@/public/assets/soldier.png";
+
+export const FIELD_BY_KEY = {
+  class: "classId",
+  species: "speciesId",
+  background: "backgroundId",
+} as const;
+
+export function mapClass(playableClass: ClassListItem) {
+  return {
+    id: playableClass.key,
+    name: playableClass.name,
+    description: playableClass.description,
+    image: classImages[playableClass.key.replace("-template", "")],
+    tags: [
+      ...(playableClass.hitDie ? [`Hitdie: ${playableClass.hitDie}`] : []),
+      ...(playableClass.primaryAbilities ?? []),
+      ...(playableClass.armorTraining ?? []),
+    ],
+  };
+}
+
+export function mapSpecies(playableSpecies: SpeciesTemplate) {
+  return {
+    id: playableSpecies.key,
+    name: playableSpecies.name,
+    description: playableSpecies.creatureType ?? "",
+    image: speciesImages[playableSpecies.key],
+    tags: playableSpecies.traits ?? [],
+  };
+}
+
+export function mapBackground(background: BackgroundTemplate) {
+  return {
+    id: background.id,
+    name: background.name,
+    description: background.description ?? "",
+    tags: [
+      ...(background.feat ? [background.feat] : []),
+      ...(background.skillProficiencies ?? []),
+      ...(background.abilityScores ?? []),
+    ],
+    image: backgroundImages[background.id],
+  };
+}
 
 export const CHARACTER_SECTIONS: CharacterSectionConfig[] = [
   {
@@ -31,4 +85,3 @@ export const CHARACTER_SECTIONS: CharacterSectionConfig[] = [
     placeholderImage: soldierImage,
   },
 ];
-

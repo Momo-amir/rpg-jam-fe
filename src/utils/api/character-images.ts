@@ -15,8 +15,8 @@ export const classImages: Record<string, StaticImageData> = {
 };
 
 export const speciesImages: Record<string, StaticImageData> = {
-  human: humanImage,
-  gnome: gnomeImage,
+  "species-human": humanImage,
+  "species-gnome": gnomeImage,
 };
 
 export const backgroundImages: Record<string, StaticImageData> = {
