@@ -29,7 +29,7 @@ export default function Statbox({ shortname, icon: Icon, value, onChange }: Stat
   }
 
   return (
-    <div className='flex flex-col items-center border rounded-lg border-white/10 px-4 py-3 gap-2 bg-surface/60 '>
+    <div className='flex flex-col items-center border rounded-lg border-primary/10 px-4 py-3 gap-2 bg-surface/60'>
       <div className="flex flex-row gap-2 items-center">
         <Icon size={16} />
         <span className='text-sm font-semibold'>{shortname}</span>
@@ -52,7 +52,7 @@ export default function Statbox({ shortname, icon: Icon, value, onChange }: Stat
           value={score}
           onChange={(event) => change(parseInt(event.target.value) || 0)}
           onFocus={(event) => event.target.select()}
-          className='w-10 text-center border border-white/20 rounded-lg h-10 bg-transparent'
+          className='w-10 text-center border border-primary/20 rounded-lg h-10 bg-transparent text-primary'
         />
         <Button
           variant='ghost'

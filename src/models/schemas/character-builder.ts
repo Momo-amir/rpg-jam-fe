@@ -79,17 +79,17 @@ const choiceDetailSchema = z.object({
   choiceGroups: z.array(choiceGroupSchema),
 });
 
-export const classChoiceSchema = z.object({
-  label: z.string(),
-  choice: choiceDetailSchema,
-});
-
 const classFeatureSchema = z.object({
   key: z.string(),
   name: z.string(),
   levelRequirement: z.number(),
   description: z.string(),
-  choice: choiceDetailSchema.nullable(),
+  choice: choiceDetailSchema.optional(),
+});
+
+export const classChoiceSchema = z.object({
+  label: z.string(),
+  choice: choiceDetailSchema,
 });
 
 export const classTemplateSchema = z.object({

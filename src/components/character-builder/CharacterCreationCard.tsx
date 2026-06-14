@@ -37,8 +37,8 @@ export function CharacterCreationCard({
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
         backgroundImage ? "min-h-72" : "",
-        isFilled ? "border-white/10" : "border-dashed border-white/10",
-        onClick && "hover:border-white/20",
+        isFilled ? "border-primary/10" : "border-dashed border-primary/10",
+        onClick && "hover:border-primary/20",
         className,
       )}
     >
@@ -72,7 +72,7 @@ export function CharacterCreationCard({
           <div
             className={cn(
               "flex items-center gap-2",
-              backgroundImage ? "text-white/70" : "text-neutraltwo",
+              backgroundImage ? "text-white/70" : "text-primary/60",
             )}
           >
             {icon}
@@ -87,7 +87,7 @@ export function CharacterCreationCard({
             <p
               className={cn(
                 "text-helper",
-                isFilled ? "text-primary" : "text-white/40",
+                isFilled ? "text-white" : "text-white/40",
               )}
             >
               {isFilled ? displayValue : description}
@@ -98,7 +98,7 @@ export function CharacterCreationCard({
             {displayValue}
           </p>
         ) : (
-          <p className='text-helper text-neutraltwo'>{description}</p>
+          <p className='text-helper text-primary/60'>{description}</p>
         )}
       </button>
 

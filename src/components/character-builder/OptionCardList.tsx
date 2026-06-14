@@ -70,7 +70,7 @@ export function OptionCardList(props: OptionCardListProps) {
     <div className='flex flex-col gap-4'>
       {label && (
         <div className='flex items-center justify-between'>
-          <p className='text-helper text-neutraltwo'>{label}</p>
+          <p className='text-helper text-primary/60'>{label}</p>
           <span className='text-helper font-medium text-secondary'>
             {selectionStatus}
           </span>

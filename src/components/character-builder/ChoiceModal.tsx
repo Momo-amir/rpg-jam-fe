@@ -52,7 +52,7 @@ export function ChoiceModal({
         )
       ) : (
         <div className='flex min-h-48 flex-col items-center justify-center'>
-          <p className='text-helper text-neutraltwo/60'>
+          <p className='text-helper text-primary/40'>
             No options available yet.
           </p>
         </div>

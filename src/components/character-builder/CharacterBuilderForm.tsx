@@ -19,7 +19,10 @@ import {
   mapSpecies,
   mapBackground,
 } from "./character-sections.config";
-import { normalizeClassChoices, normalizeSpeciesChoices } from "./normalizeChoices";
+import {
+  normalizeClassChoices,
+  normalizeSpeciesChoices,
+} from "./normalizeChoices";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
 import {
   fetchClasses,
@@ -38,10 +41,33 @@ import type {
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
-function deriveAc(armorTraining: string[], dexMod: number): number {
+const HEAVY_ARMOR_KEYS = ["chain-mail", "splint", "plate", "ring-mail"];
+const MEDIUM_ARMOR_KEYS = [
+  "chain-shirt",
+  "scale-mail",
+  "breastplate",
+  "half-plate",
+  "hide",
+];
+const LIGHT_ARMOR_KEYS = ["leather", "padded", "studded-leather-armor"];
+
+function deriveAc(
+  armorTraining: string[],
+  dexMod: number,
+  chosenEquipmentItems?: string[],
+): number {
+  if (chosenEquipmentItems) {
+    if (chosenEquipmentItems.some((k) => HEAVY_ARMOR_KEYS.includes(k)))
+      return 16;
+    if (chosenEquipmentItems.some((k) => MEDIUM_ARMOR_KEYS.includes(k)))
+      return 13 + Math.min(dexMod, 2);
+    if (chosenEquipmentItems.some((k) => LIGHT_ARMOR_KEYS.includes(k)))
+      return 11 + dexMod;
+    return 10 + dexMod;
+  }
   if (armorTraining.includes("Heavy")) return 16;
   if (armorTraining.includes("Medium")) return 13 + Math.min(dexMod, 2);
-  if (armorTraining.includes("Light")) return 11 + dexMod;
+  if (armorTraining.includes("Light")) return 12 + dexMod;
   return 10 + dexMod;
 }
 
@@ -114,7 +140,24 @@ export function CharacterBuilderForm() {
   const derivedHp = classTemplate
     ? parseInt(classTemplate.hitDie.slice(1), 10) + conMod
     : null;
-  const derivedAc = deriveAc(classTemplate?.armorTraining ?? [], dexMod);
+
+  const startingEquipmentChoice = classTemplate?.choices?.find(
+    (c) => c.label === "Starting Equipment",
+  );
+  const chosenGroupId = startingEquipmentChoice
+    ? (choices?.[startingEquipmentChoice.choice.id.value] as string | undefined)
+    : undefined;
+  const chosenEquipmentItems = chosenGroupId
+    ? startingEquipmentChoice?.choice.choiceGroups
+        .find((g) => g.id.value === chosenGroupId)
+        ?.groupContents.map((c) => c.referenceKey)
+    : undefined;
+
+  const derivedAc = deriveAc(
+    classTemplate?.armorTraining ?? [],
+    dexMod,
+    chosenEquipmentItems,
+  );
 
   useEffect(() => {
     if (!classId) return;
@@ -174,7 +217,7 @@ export function CharacterBuilderForm() {
     <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
       <div className='flex flex-col gap-2'>
         <h1>Create Your Character</h1>
-        <p className='text-neutraltwo'>
+        <p className='text-primary/60'>
           Build a level 1 character by filling in the sections below. Click any
           card to make your selections.
         </p>
@@ -247,9 +290,15 @@ export function CharacterBuilderForm() {
               key={stat.id}
               icon={stat.icon}
               shortname={stat.shortname}
-              value={abilityScores?.[stat.field as keyof typeof abilityScores] ?? 10}
+              value={
+                abilityScores?.[stat.field as keyof typeof abilityScores] ?? 10
+              }
               onChange={(value) =>
-                setValue(`abilityScores.${stat.field as keyof typeof abilityScores}`, value, { shouldValidate: true })
+                setValue(
+                  `abilityScores.${stat.field as keyof typeof abilityScores}`,
+                  value,
+                  { shouldValidate: true },
+                )
               }
             />
           ))}
@@ -280,7 +329,7 @@ export function CharacterBuilderForm() {
       ))}
 
       <div className='flex items-center justify-between border-t border-white/10 pt-6'>
-        <div className='text-helper text-neutraltwo'>
+        <div className='text-helper text-primary/60'>
           {Object.keys(errors).length > 0 && (
             <span className='text-error'>
               Please fill in all required fields.

@@ -1,7 +1,8 @@
 import type { ActiveChoice, ClassTemplate, SpeciesTemplate } from "@/models/types/character-builder.types";
+import { speciesImages } from "@/utils/api/character-images";
 import { formatReferenceKey } from "@/utils/character";
 
-type ChoiceDetail = NonNullable<NonNullable<ClassTemplate["classFeatures"]>[number]["choice"]>;
+type ChoiceDetail = NonNullable<ClassTemplate["choices"]>[number]["choice"];
 
 function normalizeChoiceDetail(label: string, choice: ChoiceDetail): ActiveChoice {
   const isBundled = choice.choiceGroups.length > 1;
@@ -21,6 +22,7 @@ function normalizeChoiceDetail(label: string, choice: ChoiceDetail): ActiveChoic
           id: content.referenceKey,
           name: formatReferenceKey(content.referenceKey),
           tags: [content.type],
+          ...(speciesImages[content.referenceKey] && { image: speciesImages[content.referenceKey] }),
         })),
       );
 
@@ -34,8 +36,8 @@ function normalizeChoiceDetail(label: string, choice: ChoiceDetail): ActiveChoic
 
 export function normalizeClassChoices(classTemplate: ClassTemplate): ActiveChoice[] {
   const featureChoices = (classTemplate.classFeatures ?? [])
-    .filter((feature) => feature.choice !== null)
-    .map((feature) => normalizeChoiceDetail(feature.name, feature.choice!));
+    .filter((f) => f.choice !== undefined)
+    .map((f) => normalizeChoiceDetail(f.name, f.choice!));
 
   const classChoices = (classTemplate.choices ?? []).map(({ label, choice }) =>
     normalizeChoiceDetail(label, choice),
@@ -49,4 +51,3 @@ export function normalizeSpeciesChoices(speciesTemplate: SpeciesTemplate): Activ
     normalizeChoiceDetail(label, choice),
   );
 }
-

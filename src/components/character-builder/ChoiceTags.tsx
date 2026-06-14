@@ -27,10 +27,17 @@ export function ChoiceTags({ choices, selected, onChoiceConfirm }: ChoiceTagsPro
               ? 1
               : 0;
           const done = count >= choice.numberOfChoices;
+          const selectedValue = selected[choice.key];
+          const chosenName =
+            done && typeof selectedValue === "string"
+              ? choice.options.find((o) => o.id === selectedValue)?.name
+              : undefined;
           return (
             <Tag
               key={choice.key}
-              label={done ? choice.title : `${choice.title} (${count}/${choice.numberOfChoices})`}
+              label={done
+                ? chosenName ? `${choice.title}: ${chosenName}` : choice.title
+                : `${choice.title} (${count}/${choice.numberOfChoices})`}
               variant={done ? "active" : "pending"}
               onClick={() => setActiveChoice(choice)}
             />

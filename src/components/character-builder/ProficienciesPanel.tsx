@@ -40,8 +40,8 @@ function ProficiencyCard({
   emptyText,
 }: ProficiencyCardProps) {
   return (
-    <div className='flex flex-col gap-3 rounded-xl border border-dashed border-white/10 bg-surface/60 p-4'>
-      <div className='flex items-center gap-2 text-neutraltwo'>
+    <div className='flex flex-col gap-3 rounded-xl border border-dashed border-primary/10 bg-surface/60 p-4'>
+      <div className='flex items-center gap-2 text-primary/60'>
         {icon}
         <span className='text-helper font-medium uppercase tracking-wider'>
           {label}
@@ -59,7 +59,7 @@ function ProficiencyCard({
           ))}
         </div>
       ) : (
-        <p className='text-helper text-neutraltwo/60'>{emptyText}</p>
+        <p className='text-helper text-primary/40'>{emptyText}</p>
       )}
     </div>
   );
@@ -99,9 +99,8 @@ export function ProficienciesPanel({
       })),
   );
 
-  // Bucket chosen referenceKeys by type for a set of labeled choices.
   const featureChosenByType = bucketChoicesByType(
-    classTemplate?.classFeatures?.map((f) => ({ choice: f.choice, origin: classTemplate.name })) ?? [],
+    (classTemplate?.classFeatures ?? []).map((f) => ({ choice: f.choice ?? null, origin: classTemplate?.name })),
     choices,
   );
 
