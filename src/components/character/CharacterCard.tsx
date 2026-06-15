@@ -5,15 +5,12 @@ interface CharacterCardProps {
   character: CharacterCardData;
 }
 
-// Backend enums arrive as PascalCase ("LawfulGood", "HeHim"). Split on the case
-// boundary and capitalise each word for display: "Lawful Good", "He Him".
 function humanizeEnum(value: string): string {
   return value
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/^./, (character) => character.toUpperCase());
 }
 
-// Pronouns read better with a slash than a space: "HeHim" -> "He/Him".
 function formatPronouns(value: string): string {
   return humanizeEnum(value).replace(" ", "/");
 }
@@ -35,8 +32,9 @@ export function CharacterCard({ character }: CharacterCardProps) {
       </div>
 
       <p className='text-helper text-primary/40'>
-        {humanizeEnum(character.background)} · {humanizeEnum(character.alignment)}{" "}
-        · {formatPronouns(character.pronouns)}
+        {humanizeEnum(character.background)} ·{" "}
+        {humanizeEnum(character.alignment)} ·{" "}
+        {formatPronouns(character.pronouns)}
       </p>
     </div>
   );
