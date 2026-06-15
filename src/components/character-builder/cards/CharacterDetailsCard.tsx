@@ -86,7 +86,8 @@ export function CharacterDetailsCard({
           <SelectTrigger size='sm' className='w-auto'>
             <SelectValue placeholder='Alignment'>
               {(value: string) =>
-                ALIGNMENTS.find((option) => option.value === value)?.label
+                ALIGNMENTS.find((option) => option.value === value)?.label ??
+                "Alignment"
               }
             </SelectValue>
           </SelectTrigger>
@@ -108,7 +109,8 @@ export function CharacterDetailsCard({
           <SelectTrigger size='sm' className='w-auto'>
             <SelectValue placeholder='Pronouns'>
               {(value: string) =>
-                PRONOUNS.find((option) => option.value === value)?.label
+                PRONOUNS.find((option) => option.value === value)?.label ??
+                "Pronouns"
               }
             </SelectValue>
           </SelectTrigger>
