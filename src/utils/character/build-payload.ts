@@ -152,9 +152,7 @@ export function buildCreateCharacterPayload(
       hitDice: hitDie,
     },
     background: backgroundTemplate?.name ?? "",
-    class: {
-      class: classTemplate?.name ?? "",
-    },
+    class: classTemplate?.name ?? "",
     speciesTraits: {
       creatureType: speciesTemplate?.creatureType ?? "",
       size: chosenSize ? toPascalCase(chosenSize) : "",

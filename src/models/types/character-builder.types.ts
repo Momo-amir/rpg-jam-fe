@@ -1,4 +1,5 @@
 import type { StaticImageData } from "next/image";
+import type { LucideIcon } from "lucide-react";
 import type { z } from "zod";
 import type {
   characterBuilderSchema,
@@ -55,6 +56,7 @@ export interface CharacterSectionConfig {
   label: string;
   description: string;
   modalTitle: string;
-  icon: React.ReactNode;
+  /** Lucide icon component — the consumer renders it, e.g. `<section.icon size={20} />`. */
+  icon: LucideIcon;
   placeholderImage: StaticImageData;
 }

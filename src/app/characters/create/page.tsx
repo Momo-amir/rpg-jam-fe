@@ -1,4 +1,4 @@
-import { CharacterBuilderForm } from "@/components/character-builder/CharacterBuilderForm";
+import { CharacterBuilderForm } from "@/components/character-builder";
 
 export default function NewCharacterPage() {
   return (

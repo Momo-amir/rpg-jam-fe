@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal } from "@/components/ui/modal";
-import { OptionCardList } from "./OptionCardList";
+import { OptionCardList } from "@/components/character-builder/modals/OptionCardList";
 import type { OptionItem } from "@/models/types/character-builder.types";
 
 interface ChoiceModalProps {
@@ -25,7 +25,8 @@ export function ChoiceModal({
   selected,
   onConfirm,
 }: ChoiceModalProps) {
-  const selectedMulti = Array.isArray(selected) ? selected : []; // best practice type guard - outer check only makes sure things are truthy this is to make sure we are certain about the type
+  // Split the incoming selection into the two shapes OptionCardList expects.
+  const selectedMulti = Array.isArray(selected) ? selected : [];
   const selectedSingle = typeof selected === "string" ? selected : undefined;
   return (
     <Modal

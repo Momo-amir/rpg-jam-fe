@@ -7,12 +7,12 @@ import { Heart, Shield, Wand2 } from "lucide-react";
 import Statbox, { Stats } from "@/components/ui/statbox";
 
 import { Button } from "@/components/ui/button";
-import { ChoiceModal } from "./ChoiceModal";
-import { ChoiceTags } from "./ChoiceTags";
-import { CharacterCreationCard } from "./CharacterCreationCard";
-import { CharacterDetailsCard } from "./CharacterDetailsCard";
-import { ProficienciesPanel } from "./ProficienciesPanel";
-import { useCharacterBuilder } from "./useCharacterBuilder";
+import { ChoiceModal } from "@/components/character-builder/modals/ChoiceModal";
+import { ChoiceTags } from "@/components/character-builder/choices/ChoiceTags";
+import { CharacterCreationCard } from "@/components/character-builder/cards/CharacterCreationCard";
+import { CharacterDetailsCard } from "@/components/character-builder/cards/CharacterDetailsCard";
+import { ProficienciesPanel } from "@/components/character-builder/panels/ProficienciesPanel";
+import { useCharacterBuilder } from "@/components/character-builder/useCharacterBuilder";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
 import { createCharacter } from "@/utils/api/characters";
 import { buildCreateCharacterPayload } from "@/utils/character";
@@ -102,7 +102,7 @@ export function CharacterBuilderForm() {
             key={section.key}
             label={section.label}
             description={section.description}
-            icon={section.icon}
+            icon={<section.icon size={20} />}
             backgroundImage={section.selectedImage ?? section.placeholderImage}
             grayscale={!section.selectedImage}
             displayValue={section.selectedName}

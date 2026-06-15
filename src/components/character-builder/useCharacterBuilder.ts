@@ -4,10 +4,13 @@ import {
   abilityModifier,
   deriveAc,
   deriveMaxHp,
-  FEATURE_LABELS,
+  mapClass,
+  mapSpecies,
+  mapBackground,
   normalizeBackgroundChoices,
   normalizeClassChoices,
   normalizeSpeciesChoices,
+  resolveChosenEquipmentKeys,
 } from "@/utils/character";
 import {
   fetchClasses,
@@ -20,13 +23,11 @@ import {
 import {
   CHARACTER_SECTIONS,
   FIELD_BY_KEY,
-  mapClass,
-  mapSpecies,
-  mapBackground,
-} from "./character-sections.config";
+} from "@/components/character-builder/sections.config";
 import type {
   ActiveChoice,
   CharacterBuilderFormValues as FormValues,
+  CharacterSectionConfig,
   ClassListItem,
   ClassTemplate,
   SpeciesListItem,
@@ -37,13 +38,7 @@ import type {
 
 type OptionList = ReturnType<typeof mapClass>[];
 
-export interface BuilderSection {
-  key: "class" | "species" | "background";
-  label: string;
-  description: string;
-  modalTitle: string;
-  icon: React.ReactNode;
-  placeholderImage: (typeof CHARACTER_SECTIONS)[number]["placeholderImage"];
+export interface BuilderSection extends CharacterSectionConfig {
   list: OptionList;
   selectedId: string;
   selectedName?: string;
@@ -165,18 +160,12 @@ export function useCharacterBuilder(
     ? deriveMaxHp(classTemplate.hitDie, abilityScores?.constitution ?? 10)
     : null;
 
-  const startingEquipmentChoice = classTemplate?.choices?.find(
-    (classChoice) => classChoice.label === FEATURE_LABELS.STARTING_EQUIPMENT,
+  // AC depends on the armor inside the chosen starting-equipment bundle (if any),
+  // falling back to the class's armor training tier.
+  const chosenEquipmentItems = resolveChosenEquipmentKeys(
+    classTemplate,
+    choices ?? {},
   );
-  const chosenGroupId = startingEquipmentChoice
-    ? (choices?.[startingEquipmentChoice.choice.id.value] as string | undefined)
-    : undefined;
-  const chosenEquipmentItems = chosenGroupId
-    ? startingEquipmentChoice?.choice.choiceGroups
-        .find((group) => group.id.value === chosenGroupId)
-        ?.groupContents.map((content) => content.referenceKey)
-    : undefined;
-
   const derivedAc = deriveAc(
     classTemplate?.armorTraining ?? [],
     dexMod,

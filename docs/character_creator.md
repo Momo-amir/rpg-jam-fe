@@ -1,16 +1,33 @@
 # Character Creator — How it works
 
-This document explains the data and UI flow for the character creation wizard.
+A walkthrough of the character creation wizard, written so someone who didn't
+build it can read, change, and extend it confidently.
+
+The wizard lives at **`/characters/create`** ([app/characters/create/page.tsx](../src/app/characters/create/page.tsx)).
+It's a single-page form: pick a class, species, and background; make the
+sub-choices each one unlocks; set ability scores; and submit to create a level 1
+character.
 
 ---
 
-## Overview
+## The one rule: components render, utils compute
 
-The character creator is a single-page form at `/characters/new`. Three concerns:
+The feature is split across two layers, and the split is the most important
+thing to understand:
 
-1. **Fetching lists** — what classes/species/backgrounds exist (populates the selection modals)
-2. **Fetching templates** — the full data for a selected option (drives the choice tags)
-3. **The form** — React Hook Form tracks all selections and sub-choices, validated by Zod
+| Layer | Where | Job |
+|---|---|---|
+| **View** | `src/components/character-builder/` | React only — render UI, hold local UI state (which modal is open), forward events. No D&D logic. |
+| **Domain** | `src/utils/character/` | Pure functions — normalize API shapes, derive HP/AC, aggregate proficiencies, build the API payload. No React, no fetching. Unit-tested. |
+
+If you're adding a *calculation* (a new derived value, a new way to group
+choices), it goes in `utils/character/`. If you're adding *something on screen*,
+it goes in a component. When a component needs a computed value, it calls a
+domain function — it never computes inline. `ProficienciesPanel` is the model
+example: it calls `aggregateProficiencies(...)` and just renders the result.
+
+Everything in `utils/character/` is re-exported from its barrel, so components
+import from `@/utils/character` (not the individual files).
 
 ---
 
@@ -18,217 +35,178 @@ The character creator is a single-page form at `/characters/new`. Three concerns
 
 ```
 src/
-├── app/characters/new/page.tsx              — Route entry point (Server Component)
-├── components/character-builder/
-│   ├── CharacterBuilderForm.tsx             — All form state and data fetching lives here
-│   ├── CharacterCreationCard.tsx            — Card shell for class/species/background
-│   ├── ChoiceTags.tsx                       — Row of tags + sub-choice modal, takes ActiveChoice[]
-│   ├── normalizeChoices.ts                  — Converts any template's choices[] into ActiveChoice[]
-│   ├── ChoiceModal.tsx                      — Generic modal (single or multi-select)
-│   ├── OptionCardList.tsx                   — Grid of selectable cards inside a modal
-│   ├── OptionCard.tsx                       — Individual card (image, name, description)
-│   └── character-sections.config.tsx        — Static config for the three main sections
+├── app/characters/create/page.tsx          — Route entry (renders <CharacterBuilderForm/>)
+│
+├── components/character-builder/            — VIEW layer
+│   ├── index.ts                             — barrel: exports CharacterBuilderForm
+│   ├── CharacterBuilderForm.tsx             — the form: RHF setup + JSX. Logic lives in the hook.
+│   ├── useCharacterBuilder.ts               — the hook: fetching, derivations, builds the `sections` array
+│   ├── sections.config.ts                   — static section metadata (CHARACTER_SECTIONS, FIELD_BY_KEY)
+│   ├── cards/
+│   │   ├── CharacterCreationCard.tsx        — card shell for class/species/background + HP/AC
+│   │   ├── CharacterDetailsCard.tsx         — name / alignment / pronouns inputs
+│   │   └── OptionCard.tsx                   — one selectable option inside a modal
+│   ├── modals/
+│   │   ├── ChoiceModal.tsx                  — generic modal (single or multi-select)
+│   │   └── OptionCardList.tsx               — grid of OptionCards + confirm button
+│   ├── choices/
+│   │   └── ChoiceTags.tsx                   — row of sub-choice tags; opens a ChoiceModal
+│   └── panels/
+│       ├── ProficienciesPanel.tsx           — render-only; calls aggregateProficiencies()
+│       └── ProficiencyCard.tsx              — one labelled tag group (Skills / Armor / Feats)
+│
+├── utils/character/                         — DOMAIN layer (all re-exported from index.ts)
+│   ├── normalize-choices.ts                 — API template → ActiveChoice[] (drives the choice tags)
+│   ├── list-items.ts                        — mapClass/mapSpecies/mapBackground → OptionItem shape
+│   ├── choices.ts                           — shared helpers: asArray, resolveSelected, bucketChosenByType, …
+│   ├── proficiencies.ts                     — aggregateProficiencies(): the panel's data
+│   ├── derive.ts                            — deriveAc()
+│   ├── stats.ts                             — abilityModifier(), deriveMaxHp(), formatReferenceKey()
+│   ├── backend-enums.ts                     — toPascalCase() for backend enum names
+│   ├── feature-labels.ts                    — label constants used to find choices by name
+│   ├── build-payload.ts                     — buildCreateCharacterPayload(): form → API request
+│   └── __fixtures__/ + *.test.ts            — Vitest tests + shared fixtures
+│
 ├── utils/api/
-│   ├── character-options.ts                 — All fetch functions
-│   └── character-images.ts                  — Frontend image map: API id → StaticImageData
-├── models/
-│   ├── schemas/character-builder.ts         — Zod schemas mirroring API response shapes
-│   └── types/character-builder.types.ts     — TypeScript types inferred from the schemas
+│   ├── character-options.ts                 — fetch functions (lists + templates)
+│   └── character-images.ts                  — API id → StaticImageData lookup tables
+└── models/
+    ├── schemas/character-builder.ts         — Zod schemas mirroring API shapes
+    └── types/character-builder.types.ts     — types inferred from the schemas
 ```
 
 ---
 
-## How it works end to end
+## End-to-end data flow
 
-### 1. On mount — fetch the lists
+1. **On mount, fetch the lists.** `useCharacterBuilder` calls `fetchClasses()`,
+   `fetchSpecies()`, `fetchBackgrounds()` once. These are lightweight — just
+   enough (id, name, a few tags) to populate the selection modals.
 
-All three lists are fetched once on mount. These are lightweight — just enough to fill the selection modals (id, name, description).
+2. **Build the `sections` array.** The hook maps `CHARACTER_SECTIONS` into one
+   `sections` array, each entry carrying its option `list` (via `mapClass`/etc.),
+   the current `selectedId`/`selectedName`/`selectedImage`, its form `field`, and
+   its normalized `choices`. The form JSX maps over this once for the cards and
+   once for the modals — no per-section `if`/ternary branching.
 
-```ts
-Promise.all([fetchClasses(), fetchSpecies(), fetchBackgrounds()])
+3. **User picks an option.** Clicking a card opens its `ChoiceModal` with that
+   section's list. Confirming calls `setValue("classId" | "speciesId" |
+   "backgroundId", id)` and closes the modal.
+
+4. **The id change fetches the full template.** A `useEffect` per section fetches
+   the heavy template (`fetchClass`, `fetchSpeciesByKey`, `fetchBackground`) when
+   its id changes. The template holds the class features, traits, and sub-choices.
+
+5. **Template → choice tags.** `normalizeClassChoices` / `normalizeSpeciesChoices`
+   / `normalizeBackgroundChoices` flatten a template's nested choice structure
+   into a uniform `ActiveChoice[]` (see below). `ChoiceTags` renders one tag per
+   entry; clicking opens a sub-choice `ChoiceModal`.
+
+6. **Sub-choice confirm writes to `form.choices`.** Every sub-choice lands in a
+   flat `Record<string, string | string[]>` keyed by the choice's `key`
+   (`setValue(`choices.${key}`, value)`).
+
+7. **Live derivations.** As scores and choices change, the hook recomputes
+   `derivedHp` (`deriveMaxHp`), `derivedAc` (`deriveAc`, using
+   `resolveChosenEquipmentKeys` to read armor out of the chosen equipment bundle),
+   and the panel recomputes proficiencies (`aggregateProficiencies`).
+
+8. **Submit.** `buildCreateCharacterPayload(form, { templates, derivedHp,
+   derivedAc })` turns everything into the backend's request shape and `POST`s via
+   `createCharacter`.
+
+---
+
+## The tricky bits, explained plainly
+
+### The nested API choice shape
+A template's sub-choice looks like this (simplified):
+
 ```
-
-### 2. User picks a section — opens the selection modal
-
-Clicking a card opens a `ChoiceModal` with that section's list. Confirming writes the chosen `id` into the form (`classId`, `speciesId`, `backgroundId`) and closes the modal.
-
-### 3. ID change triggers a template fetch
-
-Each section ID has a `useEffect` that fetches the full template when it changes:
-
-```ts
-useEffect(() => {
-  if (!classId) return;
-  fetchClass(classId).then(setClassTemplate);
-}, [classId]);
-```
-
-Species and background follow the exact same pattern with `fetchSpeciesById` and `fetchBackground`.
-
-### 4. Template → choice tags
-
-Once a template is loaded, `normalizeChoices(template)` converts its `choices[]` into a flat `ActiveChoice[]`:
-
-```ts
-interface ActiveChoice {
-  key: string;          // written into form.choices[key] on confirm
-  title: string;        // tag label and modal title
-  numberOfChoices: number;
-  options: string[];
+choice: {
+  id: { value: "fighter-skills" },     // the key we store selections under
+  numberOfChoices: 2,                  // how many the user must pick
+  choiceGroups: [                      // usually 1 group; >1 means "pick a bundle"
+    { id, label: "A", groupContents: [ { referenceKey: "acrobatics", type: "SkillProficiency", quantity: 1 }, … ] }
+  ]
 }
 ```
 
-This is passed to `ChoiceTags`, which renders a tag per entry and opens a sub-choice modal on click.
+- **One group** → the user picks individual `groupContents` (e.g. two skills).
+- **Multiple groups** → the user picks *which group* (e.g. equipment bundle A vs B);
+  the selected value is the group id, and we read the items inside it.
 
-### 5. Sub-choice confirm — writes into form.choices
+`normalize-choices.ts` is the only place that has to understand this — it turns
+it into a flat `ActiveChoice` (`{ key, title, numberOfChoices, options }`) the UI
+can render without knowing the nesting.
 
-`onChoiceConfirm(key, value)` calls `setValue(`choices.${key}`, value)`. All sub-choices land in a flat `Record<string, string | string[]>` keyed by the choice's `key`.
+### Why `bucketChosenByType` exists
+The backend tags each option with a `type` (`SkillProficiency`, `Feat`,
+`WeaponMastery`, `Size`, `Trait`, …). The user's selections arrive as a flat map
+of reference keys. To show "these chosen items are skills, those are feats", we
+group the chosen keys by their type — that's `bucketChosenByType` in `choices.ts`.
+Both the proficiencies panel and the payload builder need this; the panel also
+tracks the *origin* (which class/species granted it) for its "(Fighter)" labels.
 
----
+### PascalCase for the backend
+The API returns reference keys in kebab-case (`great-weapon-fighting`) but its C#
+enums expect PascalCase member names (`GreatWeaponFighting`). `toPascalCase` in
+`backend-enums.ts` does that conversion, and it only happens in `build-payload.ts`
+on the way *out*. Inside the app we keep the raw keys; `formatReferenceKey` makes
+them human-readable (`Great Weapon Fighting`) for display only.
 
-## normalizeChoices
-
-`normalizeChoices` in [normalizeChoices.ts](../src/components/character-builder/normalizeChoices.ts) handles the inconsistency in the API shape — `classFeatures` and `specialTraits` are arrays of named objects, while `skillProficiencies` and `size` are plain `{ numberOfChoices, options }` fields. It irons these out into a uniform `ActiveChoice[]`.
-
-The function accepts any template type structurally: `{ choices?: Record<string, unknown>[] }`. This means `ClassTemplate`, `SpeciesTemplate`, and `BackgroundTemplate` all satisfy it without needing a union type.
-
-Two internal type guards do the narrowing:
-- `isNamedItem` — matches `classFeatures` / `specialTraits` entries (have `name`, `numberOfChoices`, `options`)
-- `isFlatItem` — matches plain choice fields like `skillProficiencies`, `size`, `toolProficiency`
-
-Flat options can be either `string` or `{ label: string }` — `optionLabel` normalises both to a string. This covers `startingEquipment` which uses the object shape.
-
-It skips any entry where `numberOfChoices === 0` or `options` is empty — those are display-only, not interactive choices.
-
-`CHOICE_LABELS` inside it maps API field names to human-readable titles. Add entries there when the API introduces new flat field names.
-
-When the API is updated to return a flat `choices[]` with consistent shape, `normalizeChoices` can be deleted and `ChoiceTags` can consume `template.choices` directly.
-
----
-
-## sections array
-
-All per-section data is computed once into a `sections` array before the JSX:
-
-```ts
-const sections = CHARACTER_SECTIONS.map((section) => ({
-  ...section,       // label, icon, placeholderImage, modalTitle
-  list,             // OptionItem[] for the selection modal
-  selectedId,       // current form value
-  selectedName,     // display name for the card header
-  field,            // "classId" | "speciesId" | "backgroundId"
-  choices,          // ActiveChoice[] from normalizeChoices
-}));
-```
-
-The JSX maps over this once for the cards and once for the modals — no per-section conditionals.
+### Prefilled single-option choices
+If a choice has exactly as many options as `numberOfChoices` (e.g. "pick 1 of 1"),
+there's nothing to decide. `normalize-choices.ts` marks it with a
+`prefilledValue`, and the hook auto-writes it into the form so the tag shows as
+done without the user clicking.
 
 ---
 
-## Form data shape
+## How to add a class / species / background
 
-```ts
-{
-  name: string
-  classId: string
-  speciesId: string
-  subspeciesId?: string
-  backgroundId: string
-  abilityScores: { strength, dexterity, constitution, intelligence, wisdom, charisma }
-  choices: Record<string, string | string[]>  // sub-choices keyed by choice key
-  proficiencies: string[]
-  alignment?: string
-  pronouns?: string
-  portraitUrl?: string
-}
-```
+1. The C# team adds it to the API. No frontend schema change is needed if the
+   shape matches the existing Zod schemas.
+2. Add an image to `public/assets/` and register it in
+   [character-images.ts](../src/utils/api/character-images.ts) keyed by the API
+   `id`.
+3. Done. The list, selection modal, template fetch, choice tags, derivations, and
+   payload all pick it up automatically.
+
+If the API introduces a **new feature/choice label** you need to find by name
+(like "Starting Equipment"), add it to `FEATURE_LABELS` in
+[feature-labels.ts](../src/utils/character/feature-labels.ts).
 
 ---
 
-## Ticket: Wire up derived HP and AC cards
+## Where new logic goes
 
-**Goal:** Make the Hit Points and Armor Class cards show real values that react to the user's class selection and ability scores.
-
-**Background:** At level 1 in D&D 5e, HP equals the class's hit die maximum plus the character's Constitution modifier. AC (unarmored) equals 10 plus the Dexterity modifier. The ability modifier formula is `Math.floor((score - 10) / 2)` — a score of 10 gives +0, 12 gives +1, 8 gives -1, and so on.
-
-All the data you need is already in the form. `classTemplate` (from `useState`) holds the fetched class including `hitDie`. The ability scores live in the form under `abilityScores.constitution` and `abilityScores.dexterity`. The trick is making the component re-render when those scores change — that's what `useWatch` is for.
-
----
-
-### Step 1 — Watch the ability scores
-
-Open [CharacterBuilderForm.tsx](../src/components/character-builder/CharacterBuilderForm.tsx).
-
-Find where the other `useWatch` calls are (around line 89). Add one more underneath them:
-
-```ts
-const abilityScores = useWatch({ control, name: "abilityScores" });
-```
-
-`useWatch` subscribes the component to changes in that field. Without it, React won't re-render when scores change, so your derived values would be stale.
+| You're adding… | Put it in… |
+|---|---|
+| A new derived value (e.g. initiative) | `utils/character/derive.ts` (or a new util), surfaced via the hook |
+| A new way to group/aggregate choices | `utils/character/` + a unit test |
+| A new selectable card or panel | the matching `components/character-builder/<role>/` folder |
+| A new field in the API payload | `build-payload.ts` (+ update its test) |
+| A new top-level section | `sections.config.ts` + the hook's per-key maps |
 
 ---
 
-### Step 2 — Derive the modifier values
+## Tests
 
-Below your `useWatch` calls, but before the JSX `return`, add these two lines:
+`utils/character/` is covered by Vitest (`npm run test`):
+- `build-payload.test.ts` — the form → payload mapping (the regression guard for
+  anything that touches the submit path).
+- `proficiencies.test.ts` — the panel's aggregation.
 
-```ts
-const conMod = Math.floor(((abilityScores?.constitution ?? 10) - 10) / 2);
-const dexMod = Math.floor(((abilityScores?.dexterity ?? 10) - 10) / 2);
-```
+Both share realistic fighter/human/soldier fixtures in
+`utils/character/__fixtures__/character-templates.ts`. Add cases there when you
+change derivation or payload logic.
 
-The `?.` is optional chaining — safe if `abilityScores` is undefined on first render. The `?? 10` is a nullish coalescing fallback — if the value is null or undefined, use 10 (the neutral score that gives a +0 modifier).
-
----
-
-### Step 3 — Derive HP and AC
-
-Directly below step 2, add:
-
-```ts
-const derivedHp = classTemplate ? classTemplate.hitDie + conMod : null;
-const derivedAc = 10 + dexMod;
-```
-
-`classTemplate` is null until the user picks a class. The ternary handles that — `null` means "not ready yet". AC always has a value because 10 + DEX modifier is always valid.
-
----
-
-### Step 4 — Use the values in the cards
-
-Find the two `CharacterCreationCard` components with `label='Hit Points'` and `label='Armor Class'` (around line 252). Update their `description` props:
-
-```tsx
-<CharacterCreationCard
-  label='Hit Points'
-  description={derivedHp !== null ? `${derivedHp} HP` : "Choose a class first"}
-  icon={<Heart size={20} />}
-  className='h-full'
-/>
-<CharacterCreationCard
-  label='Armor Class'
-  description={`${derivedAc} AC`}
-  icon={<Shield size={20} />}
-  className='h-full'
-/>
-```
-
-Template literals (the backtick strings) let you embed the number directly into the display string.
-
----
-
-### How to verify it works
-
-1. Run the dev server and open `/characters/new`
-2. Before selecting a class, the HP card should say "Choose a class first" and AC should say "10 AC"
-3. Select a class — HP should update to the hit die value (e.g. Fighter shows 10, Wizard shows 6)
-4. Once ability score inputs are wired up, changing CON or DEX should update the numbers live
-
----
-
-## Adding a new class/species/background
-
-1. C# team adds it to the API — no frontend schema changes needed if the shape matches.
-2. Add an image to `public/assets/` and register it in `character-images.ts` using the API `id` as the key.
-3. Done. The list, modal, template fetch, and choice tags all pick it up automatically.
+### Verifying the UI by hand
+1. `npm run dev`, open `/characters/create`.
+2. Before picking a class, HP says "Choose a class" and AC shows the unarmored
+   value (10 + DEX modifier).
+3. Pick a class/species/background — choice tags appear; pick their sub-choices.
+4. Change CON/DEX — HP/AC update live. The proficiencies panel reflects every
+   grant.
+5. Fill everything and submit — a character is created.

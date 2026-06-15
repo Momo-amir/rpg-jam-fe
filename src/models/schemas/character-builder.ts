@@ -217,9 +217,7 @@ export const createCharacterPayloadSchema = z.object({
     hitDice: z.string(),
   }),
   background: z.string(),
-  class: z.object({
-    class: z.string(),
-  }),
+  class: z.string(),
   speciesTraits: z.object({
     creatureType: z.string(),
     size: z.string(),
