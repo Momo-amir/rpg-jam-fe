@@ -9,6 +9,7 @@ import type {
   skillChoiceSchema,
   speciesListItemSchema,
   speciesTemplateSchema,
+  backgroundListItemSchema,
   backgroundTemplateSchema,
 } from "@/models/schemas/character-builder";
 
@@ -25,6 +26,7 @@ export type ClassChoice = z.infer<typeof classChoiceSchema>;
 export type SkillChoice = z.infer<typeof skillChoiceSchema>;
 export type SpeciesListItem = z.infer<typeof speciesListItemSchema>;
 export type SpeciesTemplate = z.infer<typeof speciesTemplateSchema>;
+export type BackgroundListItem = z.infer<typeof backgroundListItemSchema>;
 export type BackgroundTemplate = z.infer<typeof backgroundTemplateSchema>;
 
 // ─── Form field keys ─────────────────────────────────────────────────────────
@@ -48,6 +50,7 @@ export interface ActiveChoice {
   title: string;
   description?: string;
   numberOfChoices: number;
+  prefilledValue?: string | string[];
   options: { id: string; name: string; tags?: string[] }[];
 }
 

@@ -4,7 +4,7 @@ import type {
   CharacterSectionConfig,
   ClassListItem,
   SpeciesListItem as SpeciesTemplate,
-  BackgroundTemplate,
+  BackgroundListItem,
 } from "@/models/types/character-builder.types";
 import {
   classImages,
@@ -45,17 +45,16 @@ export function mapSpecies(playableSpecies: SpeciesTemplate) {
   };
 }
 
-export function mapBackground(background: BackgroundTemplate) {
+export function mapBackground(background: BackgroundListItem) {
   return {
-    id: background.id,
+    id: background.key,
     name: background.name,
     description: background.description ?? "",
     tags: [
       ...(background.feat ? [background.feat] : []),
       ...(background.skillProficiencies ?? []),
-      ...(background.abilityScores ?? []),
     ],
-    image: backgroundImages[background.id],
+    image: backgroundImages[background.key],
   };
 }
 

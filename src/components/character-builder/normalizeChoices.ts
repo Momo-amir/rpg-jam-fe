@@ -1,10 +1,15 @@
-import type { ActiveChoice, ClassTemplate, SpeciesTemplate } from "@/models/types/character-builder.types";
+import type { ActiveChoice, BackgroundTemplate, ClassTemplate, SpeciesTemplate } from "@/models/types/character-builder.types";
 import { speciesImages } from "@/utils/api/character-images";
 import { formatReferenceKey } from "@/utils/character";
+import { FEATURE_LABEL_OVERRIDES } from "./feature-labels";
 
 type ChoiceDetail = NonNullable<ClassTemplate["choices"]>[number]["choice"];
 
-function normalizeChoiceDetail(label: string, choice: ChoiceDetail): ActiveChoice {
+function toDisplayLabel(label: string): string {
+  return FEATURE_LABEL_OVERRIDES[label] ?? label;
+}
+
+function normalizeChoiceDetail(label: string, choice: ChoiceDetail, description?: string): ActiveChoice {
   const isBundled = choice.choiceGroups.length > 1;
 
   const options = isBundled
@@ -26,18 +31,27 @@ function normalizeChoiceDetail(label: string, choice: ChoiceDetail): ActiveChoic
         })),
       );
 
+  const prefilledValue =
+    options.length === choice.numberOfChoices
+      ? choice.numberOfChoices === 1
+        ? options[0].id
+        : options.map((o) => o.id)
+      : undefined;
+
   return {
     key: choice.id.value,
-    title: label,
+    title: toDisplayLabel(label),
     numberOfChoices: choice.numberOfChoices,
     options,
+    ...(prefilledValue !== undefined && { prefilledValue }),
+    ...(description && { description }),
   };
 }
 
 export function normalizeClassChoices(classTemplate: ClassTemplate): ActiveChoice[] {
   const featureChoices = (classTemplate.classFeatures ?? [])
-    .filter((f) => f.choice !== undefined)
-    .map((f) => normalizeChoiceDetail(f.name, f.choice!));
+    .filter((feature) => feature.choice !== undefined)
+    .map((feature) => normalizeChoiceDetail(feature.name, feature.choice!, feature.description));
 
   const classChoices = (classTemplate.choices ?? []).map(({ label, choice }) =>
     normalizeChoiceDetail(label, choice),
@@ -46,8 +60,31 @@ export function normalizeClassChoices(classTemplate: ClassTemplate): ActiveChoic
   return [...featureChoices, ...classChoices];
 }
 
+const SPECIES_CHOICE_FIELDS: { key: keyof SpeciesTemplate; label: string }[] = [
+  { key: "size", label: "Size" },
+  { key: "lineage", label: "Lineage" },
+  { key: "skillful", label: "Skillful" },
+  { key: "versatile", label: "Versatile" },
+];
+
 export function normalizeSpeciesChoices(speciesTemplate: SpeciesTemplate): ActiveChoice[] {
-  return (speciesTemplate.choices ?? []).map(({ label, choice }) =>
-    normalizeChoiceDetail(label, choice),
-  );
+  return SPECIES_CHOICE_FIELDS.flatMap(({ key, label }) => {
+    const choice = speciesTemplate[key] as Parameters<typeof normalizeChoiceDetail>[1] | null | undefined;
+    if (!choice || choice.numberOfChoices === 0) return [];
+    return [normalizeChoiceDetail(label, choice)];
+  });
+}
+
+const BACKGROUND_CHOICE_FIELDS: { key: keyof BackgroundTemplate; label: string }[] = [
+  { key: "ability", label: "Ability Score Improvement" },
+  { key: "toolProficiencies", label: "Tool Proficiency" },
+  { key: "startingEquipment", label: "Starting Equipment" },
+];
+
+export function normalizeBackgroundChoices(backgroundTemplate: BackgroundTemplate): ActiveChoice[] {
+  return BACKGROUND_CHOICE_FIELDS.flatMap(({ key, label }) => {
+    const choice = backgroundTemplate[key] as Parameters<typeof normalizeChoiceDetail>[1] | null | undefined;
+    if (!choice || choice.numberOfChoices === 0) return [];
+    return [normalizeChoiceDetail(label, choice)];
+  });
 }

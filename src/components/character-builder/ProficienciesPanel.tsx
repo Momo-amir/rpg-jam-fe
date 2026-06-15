@@ -9,10 +9,10 @@ import type {
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
+import { FEATURE_LABELS } from "./feature-labels";
+
 const SKILL_GRANT_TRAITS = ["Skillful"];
 const FEAT_GRANT_TRAITS = ["Versatile"];
-
-const SKILL_PROFICIENCY_LABEL = "Skill Proficiencies";
 
 interface ProficienciesPanelProps {
   classTemplate: ClassTemplate | null;
@@ -78,11 +78,11 @@ export function ProficienciesPanel({
 }: ProficienciesPanelProps) {
   const backgroundSkills: LabeledItem[] = (
     backgroundTemplate?.skillProficiencies ?? []
-  ).map((s) => ({ value: s, origin: backgroundTemplate?.name }));
+  ).map((skill) => ({ value: skill, origin: backgroundTemplate?.name }));
 
   // Skill proficiencies chosen from class-level choices (e.g. "Skill Proficiencies" label)
   const skillChoiceKey = classTemplate?.choices?.find(
-    (c) => c.label === SKILL_PROFICIENCY_LABEL,
+    (classChoice) => classChoice.label === FEATURE_LABELS.SKILL_PROFICIENCIES,
   )?.choice.id.value;
   const classChosenSkills: LabeledItem[] = toStringArray(
     skillChoiceKey ? choices[skillChoiceKey] : undefined,
@@ -93,27 +93,40 @@ export function ProficienciesPanel({
 
   const traitGrantedSkills: LabeledItem[] = SKILL_GRANT_TRAITS.flatMap(
     (traitName) =>
-      toStringArray(choices[traitName]).map((s) => ({
-        value: s,
+      toStringArray(choices[traitName]).map((skill) => ({
+        value: skill,
         origin: traitName,
       })),
   );
 
   const featureChosenByType = bucketChoicesByType(
-    (classTemplate?.classFeatures ?? []).map((f) => ({ choice: f.choice ?? null, origin: classTemplate?.name })),
+    (classTemplate?.classFeatures ?? []).map((feature) => ({
+      choice: feature.choice ?? null,
+      origin: classTemplate?.name,
+    })),
     choices,
   );
 
   const speciesChosenByType = bucketChoicesByType(
-    (speciesTemplate?.choices ?? []).map(({ choice }) => ({ choice, origin: speciesTemplate?.name })),
+    (["size", "lineage", "skillful", "versatile"] as const).map((key) => ({
+      choice: speciesTemplate?.[key] ?? null,
+      origin: speciesTemplate?.name,
+    })),
     choices,
   );
 
-  const featureSkills: LabeledItem[] = featureChosenByType["SkillProficiency"] ?? [];
+  const featureSkills: LabeledItem[] =
+    featureChosenByType["SkillProficiency"] ?? [];
   const featureFeats: LabeledItem[] = featureChosenByType["Feat"] ?? [];
-  const featureWeaponMasteries: LabeledItem[] = featureChosenByType["WeaponMastery"] ?? [];
-  const speciesSkills: LabeledItem[] = speciesChosenByType["SkillProficiency"] ?? [];
+  const featureWeaponMasteries: LabeledItem[] =
+    featureChosenByType["WeaponMastery"] ?? [];
+  const speciesSkills: LabeledItem[] =
+    speciesChosenByType["SkillProficiency"] ?? [];
   const speciesFeats: LabeledItem[] = speciesChosenByType["Feat"] ?? [];
+
+  const savingThrowItems: LabeledItem[] = (
+    classTemplate?.savingThrow ?? []
+  ).map((safe) => ({ value: `${safe} Save`, origin: classTemplate?.name }));
 
   const allSkills = dedupeByValue([
     ...backgroundSkills,
@@ -121,15 +134,16 @@ export function ProficienciesPanel({
     ...featureSkills,
     ...speciesSkills,
     ...traitGrantedSkills,
+    ...savingThrowItems,
   ]);
 
   //  Armor & Weapons
   const armorItems: LabeledItem[] = (classTemplate?.armorTraining ?? []).map(
-    (a) => ({ value: a }),
+    (armor) => ({ value: armor }),
   );
   const weaponItems: LabeledItem[] = (
     classTemplate?.weaponProficiency ?? []
-  ).map((w: string) => ({ value: w }));
+  ).map((weapon: string) => ({ value: weapon }));
 
   //  Feats & Traits
   const backgroundFeat: LabeledItem[] = backgroundTemplate?.feat
@@ -137,16 +151,18 @@ export function ProficienciesPanel({
     : [];
 
   // Show only the chosen tool, not all options. Fall back to nothing if not chosen yet.
-  const chosenTool = toStringArray(choices["toolProficiency"]);
-  const toolItems: LabeledItem[] = chosenTool.map((t) => ({ value: t }));
+  const toolChoiceKey = backgroundTemplate?.toolProficiencies?.id.value;
+  const chosenTool = toStringArray(toolChoiceKey ? choices[toolChoiceKey] : undefined);
+  const toolItems: LabeledItem[] = chosenTool.map((tool) => ({
+    value: formatReferenceKey(tool),
+  }));
 
   // Passive species traits — all traits that don't grant a further choice
   const passiveTraits: LabeledItem[] = (speciesTemplate?.traits ?? [])
     .filter(
-      (t) => !SKILL_GRANT_TRAITS.includes(t) && !FEAT_GRANT_TRAITS.includes(t),
+      (trait) => !SKILL_GRANT_TRAITS.includes(trait) && !FEAT_GRANT_TRAITS.includes(trait),
     )
-    .map((t) => ({ value: formatReferenceKey(t) }));
-
+    .map((trait) => ({ value: formatReferenceKey(trait) }));
 
   return (
     <div className='col-span-6 row-start-3 flex flex-col gap-3 md:col-span-2 md:col-start-5'>
@@ -179,7 +195,10 @@ export function ProficienciesPanel({
 }
 
 type ChoiceSource = {
-  choice: { id: { value: string }; choiceGroups: { groupContents: { referenceKey: string; type: string }[] }[] } | null;
+  choice: {
+    id: { value: string };
+    choiceGroups: { groupContents: { referenceKey: string; type: string }[] }[];
+  } | null;
   origin: string | undefined;
 };
 

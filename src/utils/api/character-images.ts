@@ -24,6 +24,6 @@ export const speciesImages: Record<string, StaticImageData> = {
 };
 
 export const backgroundImages: Record<string, StaticImageData> = {
-  soldier: soldierImage,
-  sage: sageImage,
+  "background-soldier": soldierImage,
+  "background-sage": sageImage,
 };

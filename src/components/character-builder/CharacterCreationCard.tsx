@@ -15,6 +15,7 @@ interface CharacterCreationCardProps {
   onClick?: () => void;
   children?: React.ReactNode;
   style?: React.CSSProperties;
+  error?: boolean;
 }
 
 export function CharacterCreationCard({
@@ -28,6 +29,7 @@ export function CharacterCreationCard({
   onClick,
   children,
   style,
+  error = false,
 }: CharacterCreationCardProps) {
   const isFilled = displayValue !== undefined && displayValue !== "";
 
@@ -37,7 +39,11 @@ export function CharacterCreationCard({
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-xl border transition-all",
         backgroundImage ? "min-h-72" : "",
-        isFilled ? "border-primary/10" : "border-dashed border-primary/10",
+        error
+          ? "border-error"
+          : isFilled
+            ? "border-primary/10"
+            : "border-dashed border-primary/10",
         onClick && "hover:border-primary/20",
         className,
       )}

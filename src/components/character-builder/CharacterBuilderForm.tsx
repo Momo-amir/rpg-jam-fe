@@ -12,6 +12,7 @@ import { ChoiceTags } from "./ChoiceTags";
 import { CharacterCreationCard } from "./CharacterCreationCard";
 import { CharacterDetailsCard } from "./CharacterDetailsCard";
 import { ProficienciesPanel } from "./ProficienciesPanel";
+import { FEATURE_LABELS } from "./feature-labels";
 import {
   CHARACTER_SECTIONS,
   FIELD_BY_KEY,
@@ -22,8 +23,10 @@ import {
 import {
   normalizeClassChoices,
   normalizeSpeciesChoices,
+  normalizeBackgroundChoices,
 } from "./normalizeChoices";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
+import { createCharacter } from "@/utils/api/characters";
 import {
   fetchClasses,
   fetchSpecies,
@@ -38,6 +41,7 @@ import type {
   ClassTemplate,
   SpeciesListItem,
   SpeciesTemplate,
+  BackgroundListItem,
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
@@ -57,12 +61,12 @@ function deriveAc(
   chosenEquipmentItems?: string[],
 ): number {
   if (chosenEquipmentItems) {
-    if (chosenEquipmentItems.some((k) => HEAVY_ARMOR_KEYS.includes(k)))
+    if (chosenEquipmentItems.some((itemKey) => HEAVY_ARMOR_KEYS.includes(itemKey)))
       return 16;
-    if (chosenEquipmentItems.some((k) => MEDIUM_ARMOR_KEYS.includes(k)))
+    if (chosenEquipmentItems.some((itemKey) => MEDIUM_ARMOR_KEYS.includes(itemKey)))
       return 13 + Math.min(dexMod, 2);
-    if (chosenEquipmentItems.some((k) => LIGHT_ARMOR_KEYS.includes(k)))
-      return 11 + dexMod;
+    if (chosenEquipmentItems.some((itemKey) => LIGHT_ARMOR_KEYS.includes(itemKey)))
+      return 12 + dexMod;
     return 10 + dexMod;
   }
   if (armorTraining.includes("Heavy")) return 16;
@@ -74,7 +78,7 @@ function deriveAc(
 export function CharacterBuilderForm() {
   const [classes, setClasses] = useState<ClassListItem[]>([]);
   const [species, setSpecies] = useState<SpeciesListItem[]>([]);
-  const [backgrounds, setBackgrounds] = useState<BackgroundTemplate[]>([]);
+  const [backgrounds, setBackgrounds] = useState<BackgroundListItem[]>([]);
   const [classTemplate, setClassTemplate] = useState<ClassTemplate | null>(
     null,
   );
@@ -111,7 +115,6 @@ export function CharacterBuilderForm() {
         charisma: 10,
       },
       choices: {},
-      proficiencies: [],
       alignment: undefined,
       pronouns: undefined,
       portraitUrl: undefined,
@@ -142,15 +145,15 @@ export function CharacterBuilderForm() {
     : null;
 
   const startingEquipmentChoice = classTemplate?.choices?.find(
-    (c) => c.label === "Starting Equipment",
+    (classChoice) => classChoice.label === FEATURE_LABELS.STARTING_EQUIPMENT,
   );
   const chosenGroupId = startingEquipmentChoice
     ? (choices?.[startingEquipmentChoice.choice.id.value] as string | undefined)
     : undefined;
   const chosenEquipmentItems = chosenGroupId
     ? startingEquipmentChoice?.choice.choiceGroups
-        .find((g) => g.id.value === chosenGroupId)
-        ?.groupContents.map((c) => c.referenceKey)
+        .find((group) => group.id.value === chosenGroupId)
+        ?.groupContents.map((content) => content.referenceKey)
     : undefined;
 
   const derivedAc = deriveAc(
@@ -173,6 +176,19 @@ export function CharacterBuilderForm() {
     if (!backgroundId) return;
     fetchBackground(backgroundId).then(setBackgroundTemplate);
   }, [backgroundId]);
+
+  useEffect(() => {
+    const allChoices = [
+      ...(classTemplate ? normalizeClassChoices(classTemplate) : []),
+      ...(speciesTemplate ? normalizeSpeciesChoices(speciesTemplate) : []),
+      ...(backgroundTemplate ? normalizeBackgroundChoices(backgroundTemplate) : []),
+    ];
+    for (const choice of allChoices) {
+      if (choice.prefilledValue !== undefined) {
+        setValue(`choices.${choice.key}`, choice.prefilledValue, { shouldValidate: true });
+      }
+    }
+  }, [classTemplate, speciesTemplate, backgroundTemplate]);
 
   const [openModal, setOpenModal] = useState<string | null>(null);
 
@@ -205,12 +221,14 @@ export function CharacterBuilderForm() {
           ? normalizeClassChoices(classTemplate)
           : section.key === "species" && speciesTemplate
             ? normalizeSpeciesChoices(speciesTemplate)
-            : [],
+            : section.key === "background" && backgroundTemplate
+              ? normalizeBackgroundChoices(backgroundTemplate)
+              : [],
     };
   });
 
-  function onSubmit(data: FormValues) {
-    console.log("Character form submit:", data);
+  async function onSubmit(data: FormValues) {
+    await createCharacter(data);
   }
 
   return (
@@ -235,6 +253,9 @@ export function CharacterBuilderForm() {
             displayValue={section.selectedName}
             onClick={() => setOpenModal(section.key)}
             className='col-span-6 md:col-span-4 md:col-start-1'
+            error={
+              !!errors[section.field as "classId" | "speciesId" | "backgroundId"]
+            }
           >
             {section.choices.length > 0 && (
               <ChoiceTags

@@ -125,45 +125,61 @@ export const speciesListItemSchema = z.object({
 });
 
 export const speciesTemplateSchema = z.object({
-  id: z.string().optional(),
+  id: groupIdSchema.optional(),
   key: z.string(),
   name: z.string(),
   creatureType: z.string().optional(),
   speed: z.number().optional(),
   traits: z.array(z.string()).optional(),
-  choices: z.array(classChoiceSchema).optional(),
+  size: choiceDetailSchema.nullable().optional(),
+  lineage: choiceDetailSchema.nullable().optional(),
+  skillful: choiceDetailSchema.nullable().optional(),
+  versatile: choiceDetailSchema.nullable().optional(),
 });
 
 // ─── Background schemas ───────────────────────────────────────────────────────
 
-const backgroundEquipmentOptionSchema = z.object({
-  label: z.string(),
-  optionGroup: z.array(z.string()),
-});
-
-const backgroundChoiceSchema = z.object({
-  toolProficiency: z
-    .object({
-      numberOfChoices: z.number(),
-      options: z.array(z.string()),
-    })
-    .optional(),
-  startingEquipment: z
-    .object({
-      numberOfChoices: z.number(),
-      options: z.array(backgroundEquipmentOptionSchema),
-    })
-    .optional(),
+export const backgroundListItemSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  feat: z.string().optional(),
+  skillProficiencies: z.array(z.string()).optional(),
 });
 
 export const backgroundTemplateSchema = z.object({
-  id: z.string(),
+  id: groupIdSchema,
+  key: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  abilityScores: z.array(z.string()).optional(),
   feat: z.string().optional(),
   skillProficiencies: z.array(z.string()).optional(),
-  choices: z.array(backgroundChoiceSchema).optional(),
+  ability: choiceDetailSchema.optional(),
+  toolProficiencies: choiceDetailSchema.optional(),
+  startingEquipment: choiceDetailSchema.optional(),
+});
+
+// ─── Saved character ─────────────────────────────────────────────────────────
+
+export const characterSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  classId: z.string(),
+  speciesId: z.string(),
+  subspeciesId: z.string().optional(),
+  backgroundId: z.string(),
+  level: z.number().default(1),
+  abilityScores: z.object({
+    strength: z.number(),
+    dexterity: z.number(),
+    constitution: z.number(),
+    intelligence: z.number(),
+    wisdom: z.number(),
+    charisma: z.number(),
+  }),
+  alignment: z.string().optional(),
+  pronouns: z.string().optional(),
+  portraitUrl: z.string().optional(),
 });
 
 // ─── Character builder form ───────────────────────────────────────────────────
@@ -185,7 +201,6 @@ export const characterBuilderSchema = z.object({
   backgroundId: z.string().min(1, "Background is required"),
   abilityScores: abilityScoresSchema,
   choices: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
-  proficiencies: z.array(z.string()),
   alignment: z.string().optional(),
   pronouns: z.string().optional(),
   portraitUrl: z.string().optional(),

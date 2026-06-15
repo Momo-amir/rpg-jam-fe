@@ -5,6 +5,7 @@ import {
   classTemplateSchema,
   speciesListItemSchema,
   speciesTemplateSchema,
+  backgroundListItemSchema,
   backgroundTemplateSchema,
 } from "@/models/schemas/character-builder";
 import type {
@@ -12,6 +13,7 @@ import type {
   ClassTemplate,
   SpeciesListItem,
   SpeciesTemplate,
+  BackgroundListItem,
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
@@ -41,19 +43,14 @@ export async function fetchSpeciesByKey(key: string): Promise<SpeciesTemplate> {
   return speciesTemplateSchema.parse(response.data);
 }
 
-export async function fetchBackgrounds(): Promise<BackgroundTemplate[]> {
-  const response = await apiClient.get("/api/getbackgrounds");
+export async function fetchBackgrounds(): Promise<BackgroundListItem[]> {
+  const response = await apiClient.get("/api/backgrounds/all");
   return z
-    .array(backgroundTemplateSchema)
+    .array(backgroundListItemSchema)
     .parse(response.data.backgrounds ?? response.data);
 }
 
-export async function fetchBackground(id: string): Promise<BackgroundTemplate> {
-  const response = await apiClient.get("/api/getbackgrounds");
-  const backgrounds = z
-    .array(backgroundTemplateSchema)
-    .parse(response.data.backgrounds ?? response.data);
-  const found = backgrounds.find((b) => b.id === id);
-  if (!found) throw new Error(`Background not found: ${id}`);
-  return found;
+export async function fetchBackground(key: string): Promise<BackgroundTemplate> {
+  const response = await apiClient.get(`/api/background/${key}`);
+  return backgroundTemplateSchema.parse(response.data);
 }
