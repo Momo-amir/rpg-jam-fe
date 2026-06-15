@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { buildCreateCharacterPayload } from "@/utils/character/build-payload";
-import { fighter, human, soldier, form } from "./__fixtures__/character-templates";
+import { normalizeSpeciesChoices } from "@/utils/character/normalize-choices";
+import {
+  fighter,
+  human,
+  gnome,
+  soldier,
+  form,
+} from "./__fixtures__/character-templates";
 
 describe("buildCreateCharacterPayload", () => {
   const payload = buildCreateCharacterPayload(form, {
@@ -74,6 +81,31 @@ describe("buildCreateCharacterPayload", () => {
   it("omits empty optional lists (Fighter has no cantrips/spells)", () => {
     expect(payload).not.toHaveProperty("cantrips");
     expect(payload).not.toHaveProperty("spells");
+  });
+
+  it("sends a fixed-grant size (numberOfChoices === 0) through the prefilled choices", () => {
+    // Mirror the builder: the prefill effect writes the fixed grant into form.choices.
+    const prefilled = Object.fromEntries(
+      normalizeSpeciesChoices(gnome)
+        .filter((choice) => choice.prefilledValue !== undefined)
+        .map((choice) => [choice.key, choice.prefilledValue!]),
+    );
+    const gnomePayload = buildCreateCharacterPayload(
+      {
+        ...form,
+        choices: { ...prefilled, "gnome-lineage": "forest-gnome" },
+      },
+      {
+        classTemplate: fighter,
+        speciesTemplate: gnome,
+        backgroundTemplate: soldier,
+        derivedHp: 12,
+        derivedAc: 16,
+      },
+    );
+
+    expect(gnomePayload.speciesTraits.size).toBe("Small");
+    expect(gnomePayload.speciesTraits.lineage).toBe("ForestGnome");
   });
 
   it("maps the nested shape with abilities and hit points", () => {

@@ -42,11 +42,15 @@ function normalizeChoiceDetail(
       );
 
   const prefilledValue =
-    options.length === choice.numberOfChoices
-      ? choice.numberOfChoices === 1
+    choice.numberOfChoices === 0
+      ? options.length === 1
         ? options[0].id
         : options.map((option) => option.id)
-      : undefined;
+      : options.length === choice.numberOfChoices
+        ? choice.numberOfChoices === 1
+          ? options[0].id
+          : options.map((option) => option.id)
+        : undefined;
 
   return {
     key: choice.id.value,
@@ -63,10 +67,11 @@ function normalizeChoiceDetail(
 function normalizeChoiceList(
   choices: { label: string; choice: ChoiceDetail }[] | undefined,
 ): ActiveChoice[] {
-  return (choices ?? []).flatMap(({ label, choice }) => {
-    if (choice.numberOfChoices === 0) return [];
-    return [normalizeChoiceDetail(label, choice)];
-  });
+  // Fixed grants (numberOfChoices === 0) stay in the list so the prefill effect
+  // writes their always-taken options into the form; ChoiceTags hides them.
+  return (choices ?? []).map(({ label, choice }) =>
+    normalizeChoiceDetail(label, choice),
+  );
 }
 
 export function normalizeClassChoices(

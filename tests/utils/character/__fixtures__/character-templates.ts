@@ -205,6 +205,66 @@ export const human: SpeciesTemplate = {
   ],
 };
 
+// Gnome's Size is a fixed grant: numberOfChoices === 0 with a single always-taken
+// option. There is nothing for the user to pick, so the builder must prefill it.
+export const gnome: SpeciesTemplate = {
+  key: "species-gnome",
+  name: "Gnome",
+  creatureType: "Humanoid",
+  speed: 30,
+  traits: ["Darkvision", "GnomishCunning", "GnomishLineage"],
+  choices: [
+    {
+      label: "Size",
+      choice: {
+        id: { value: "gnome-size" },
+        numberOfChoices: 0,
+        choiceGroups: [
+          {
+            id: { value: "gsg" },
+            label: "A",
+            groupContents: [
+              {
+                id: { value: "gs1" },
+                type: "Size",
+                quantity: 1,
+                referenceKey: "small",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      label: "Lineage",
+      choice: {
+        id: { value: "gnome-lineage" },
+        numberOfChoices: 1,
+        choiceGroups: [
+          {
+            id: { value: "glg" },
+            label: "A",
+            groupContents: [
+              {
+                id: { value: "gl1" },
+                type: "Trait",
+                quantity: 1,
+                referenceKey: "forest-gnome",
+              },
+              {
+                id: { value: "gl2" },
+                type: "Trait",
+                quantity: 1,
+                referenceKey: "rock-gnome",
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+};
+
 export const soldier: BackgroundTemplate = {
   key: "background-soldier",
   name: "Soldier",

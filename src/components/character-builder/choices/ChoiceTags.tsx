@@ -23,33 +23,35 @@ export function ChoiceTags({
 
   return (
     <>
-      <div className='relative flex flex-wrap gap-2 px-5 pb-4'>
-        {choices.map((choice) => {
-          const selectedValue = selected[choice.key];
-          const count = Array.isArray(selectedValue)
-            ? selectedValue.length
-            : selectedValue
-              ? 1
-              : 0;
-          const done = count >= choice.numberOfChoices;
-          const chosenLabel = done
-            ? optionNames(choice, selectedValue)
-            : undefined;
-          return (
-            <Tag
-              key={choice.key}
-              label={
-                done
-                  ? chosenLabel
-                    ? `${choice.title}: ${chosenLabel}`
-                    : choice.title
-                  : `${choice.title} (${count}/${choice.numberOfChoices})`
-              }
-              variant={done ? "active" : showErrors ? "error" : "pending"}
-              onClick={() => setActiveChoice(choice)}
-            />
-          );
-        })}
+      <div className="relative flex flex-wrap gap-2 px-5 pb-4">
+        {choices
+          .filter((choice) => choice.numberOfChoices > 0)
+          .map((choice) => {
+            const selectedValue = selected[choice.key];
+            const count = Array.isArray(selectedValue)
+              ? selectedValue.length
+              : selectedValue
+                ? 1
+                : 0;
+            const done = count >= choice.numberOfChoices;
+            const chosenLabel = done
+              ? optionNames(choice, selectedValue)
+              : undefined;
+            return (
+              <Tag
+                key={choice.key}
+                label={
+                  done
+                    ? chosenLabel
+                      ? `${choice.title}: ${chosenLabel}`
+                      : choice.title
+                    : `${choice.title} (${count}/${choice.numberOfChoices})`
+                }
+                variant={done ? "active" : showErrors ? "error" : "pending"}
+                onClick={() => setActiveChoice(choice)}
+              />
+            );
+          })}
       </div>
 
       {activeChoice && (
@@ -80,6 +82,7 @@ function optionNames(
     choice.options.find((option) => option.id === id)?.name ?? id;
 
   if (typeof selectedValue === "string") return nameFor(selectedValue);
-  if (Array.isArray(selectedValue)) return selectedValue.map(nameFor).join(", ");
+  if (Array.isArray(selectedValue))
+    return selectedValue.map(nameFor).join(", ");
   return undefined;
 }
