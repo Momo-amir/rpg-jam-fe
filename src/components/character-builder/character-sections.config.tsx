@@ -11,6 +11,7 @@ import {
   speciesImages,
   backgroundImages,
 } from "@/utils/api/character-images";
+import { formatReferenceKey } from "@/utils/character";
 import bardImage from "@/public/assets/bard.png";
 import humanImage from "@/public/assets/human.png";
 import soldierImage from "@/public/assets/soldier.png";
@@ -51,7 +52,7 @@ export function mapBackground(background: BackgroundListItem) {
     name: background.name,
     description: background.description ?? "",
     tags: [
-      ...(background.feat ? [background.feat] : []),
+      ...(background.feat ? [formatReferenceKey(background.feat)] : []),
       ...(background.skillProficiencies ?? []),
     ],
     image: backgroundImages[background.key],

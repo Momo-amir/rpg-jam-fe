@@ -1,15 +1,19 @@
 "use client";
 
 import { BookOpen, Shield, Sparkles } from "lucide-react";
-import { formatReferenceKey } from "@/utils/character";
 import { Tag } from "@/components/ui/tag";
 import type {
   ClassTemplate,
   SpeciesTemplate,
   BackgroundTemplate,
 } from "@/models/types/character-builder.types";
-
-import { FEATURE_LABELS } from "./feature-labels";
+import {
+  asArray,
+  FEATURE_LABELS,
+  formatReferenceKey,
+  resolveSelected,
+  type SelectedChoices,
+} from "@/utils/character";
 
 const SKILL_GRANT_TRAITS = ["Skillful"];
 const FEAT_GRANT_TRAITS = ["Versatile"];
@@ -18,7 +22,7 @@ interface ProficienciesPanelProps {
   classTemplate: ClassTemplate | null;
   speciesTemplate: SpeciesTemplate | null;
   backgroundTemplate: BackgroundTemplate | null;
-  choices: Record<string, string | string[]>;
+  choices: SelectedChoices;
 }
 
 interface LabeledItem {
@@ -65,11 +69,6 @@ function ProficiencyCard({
   );
 }
 
-function toStringArray(value: string | string[] | undefined): string[] {
-  if (!value) return [];
-  return Array.isArray(value) ? value : [value];
-}
-
 export function ProficienciesPanel({
   classTemplate,
   speciesTemplate,
@@ -81,11 +80,10 @@ export function ProficienciesPanel({
   ).map((skill) => ({ value: skill, origin: backgroundTemplate?.name }));
 
   // Skill proficiencies chosen from class-level choices (e.g. "Skill Proficiencies" label)
-  const skillChoiceKey = classTemplate?.choices?.find(
-    (classChoice) => classChoice.label === FEATURE_LABELS.SKILL_PROFICIENCIES,
-  )?.choice.id.value;
-  const classChosenSkills: LabeledItem[] = toStringArray(
-    skillChoiceKey ? choices[skillChoiceKey] : undefined,
+  const classChosenSkills: LabeledItem[] = resolveSelected(
+    classTemplate,
+    FEATURE_LABELS.SKILL_PROFICIENCIES,
+    choices,
   ).map((referenceKey) => ({
     value: formatReferenceKey(referenceKey),
     origin: classTemplate?.name,
@@ -93,7 +91,7 @@ export function ProficienciesPanel({
 
   const traitGrantedSkills: LabeledItem[] = SKILL_GRANT_TRAITS.flatMap(
     (traitName) =>
-      toStringArray(choices[traitName]).map((skill) => ({
+      asArray(choices[traitName]).map((skill) => ({
         value: skill,
         origin: traitName,
       })),
@@ -108,8 +106,8 @@ export function ProficienciesPanel({
   );
 
   const speciesChosenByType = bucketChoicesByType(
-    (["size", "lineage", "skillful", "versatile"] as const).map((key) => ({
-      choice: speciesTemplate?.[key] ?? null,
+    (speciesTemplate?.choices ?? []).map((entry) => ({
+      choice: entry.choice,
       origin: speciesTemplate?.name,
     })),
     choices,
@@ -147,13 +145,15 @@ export function ProficienciesPanel({
 
   //  Feats & Traits
   const backgroundFeat: LabeledItem[] = backgroundTemplate?.feat
-    ? [{ value: backgroundTemplate.feat }]
+    ? [{ value: formatReferenceKey(backgroundTemplate.feat) }]
     : [];
 
   // Show only the chosen tool, not all options. Fall back to nothing if not chosen yet.
-  const toolChoiceKey = backgroundTemplate?.toolProficiencies?.id.value;
-  const chosenTool = toStringArray(toolChoiceKey ? choices[toolChoiceKey] : undefined);
-  const toolItems: LabeledItem[] = chosenTool.map((tool) => ({
+  const toolItems: LabeledItem[] = resolveSelected(
+    backgroundTemplate,
+    FEATURE_LABELS.TOOL_PROFICIENCY,
+    choices,
+  ).map((tool) => ({
     value: formatReferenceKey(tool),
   }));
 
@@ -204,12 +204,12 @@ type ChoiceSource = {
 
 function bucketChoicesByType(
   sources: ChoiceSource[],
-  choices: Record<string, string | string[]>,
+  choices: SelectedChoices,
 ): Record<string, LabeledItem[]> {
   const result: Record<string, LabeledItem[]> = {};
   for (const { choice, origin } of sources) {
     if (!choice) continue;
-    const chosen = toStringArray(choices[choice.id.value]);
+    const chosen = asArray(choices[choice.id.value]);
     if (!chosen.length) continue;
     const typeByKey: Record<string, string> = {};
     for (const group of choice.choiceGroups) {

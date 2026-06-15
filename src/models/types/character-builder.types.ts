@@ -2,11 +2,10 @@ import type { StaticImageData } from "next/image";
 import type { z } from "zod";
 import type {
   characterBuilderSchema,
-  abilityScoresSchema,
+  createCharacterPayloadSchema,
+  characterSchema,
   classTemplateSchema,
   classListItemSchema,
-  classChoiceSchema,
-  skillChoiceSchema,
   speciesListItemSchema,
   speciesTemplateSchema,
   backgroundListItemSchema,
@@ -16,32 +15,17 @@ import type {
 // ─── Form types ───────────────────────────────────────────────────────────────
 
 export type CharacterBuilderFormValues = z.infer<typeof characterBuilderSchema>;
-export type AbilityScores = z.infer<typeof abilityScoresSchema>;
+export type CreateCharacterPayload = z.infer<typeof createCharacterPayloadSchema>;
+export type Character = z.infer<typeof characterSchema>;
 
 // ─── API response types ───────────────────────────────────────────────────────
 
 export type ClassTemplate = z.infer<typeof classTemplateSchema>;
 export type ClassListItem = z.infer<typeof classListItemSchema>;
-export type ClassChoice = z.infer<typeof classChoiceSchema>;
-export type SkillChoice = z.infer<typeof skillChoiceSchema>;
 export type SpeciesListItem = z.infer<typeof speciesListItemSchema>;
 export type SpeciesTemplate = z.infer<typeof speciesTemplateSchema>;
 export type BackgroundListItem = z.infer<typeof backgroundListItemSchema>;
 export type BackgroundTemplate = z.infer<typeof backgroundTemplateSchema>;
-
-// ─── Form field keys ─────────────────────────────────────────────────────────
-
-export type CharacterCreatorChoice =
-  | "class"
-  | "species"
-  | "background"
-  | "ability-scores"
-  | "proficiencies"
-  | "ac"
-  | "hp"
-  | "alignment"
-  | "portrait"
-  | "name";
 
 // ─── Choice normalizer types ──────────────────────────────────────────────────
 
@@ -53,21 +37,6 @@ export interface ActiveChoice {
   prefilledValue?: string | string[];
   options: { id: string; name: string; tags?: string[] }[];
 }
-
-export type NamedItem = {
-  id?: string;
-  name: string;
-  numberOfChoices: number;
-  options: string[];
-  description?: string;
-};
-
-export type EquipmentOption = { label: string; optionGroup?: string[] };
-
-export type FlatItem = {
-  numberOfChoices: number;
-  options: (string | EquipmentOption)[];
-};
 
 // ─── UI option shape ──────────────────────────────────────────────────────────
 
@@ -81,10 +50,8 @@ export interface OptionItem {
 
 // ─── Character builder section config ────────────────────────────────────────
 
-export type CharacterSectionKey = "class" | "species" | "background";
-
 export interface CharacterSectionConfig {
-  key: CharacterSectionKey;
+  key: "class" | "species" | "background";
   label: string;
   description: string;
   modalTitle: string;

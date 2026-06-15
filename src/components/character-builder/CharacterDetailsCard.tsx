@@ -11,26 +11,39 @@ import {
   SelectScrollDownArrow,
 } from "@/components/ui/select";
 
+// value = backend enum member name (what we send and store); label = display only.
 const ALIGNMENTS = [
-  "Lawful Good",
-  "Neutral Good",
-  "Chaotic Good",
-  "Lawful Neutral",
-  "True Neutral",
-  "Chaotic Neutral",
-  "Lawful Evil",
-  "Neutral Evil",
-  "Chaotic Evil",
+  { value: "LawfulGood", label: "Lawful Good" },
+  { value: "NeutralGood", label: "Neutral Good" },
+  { value: "ChaoticGood", label: "Chaotic Good" },
+  { value: "LawfulNeutral", label: "Lawful Neutral" },
+  { value: "TrueNeutral", label: "True Neutral" },
+  { value: "ChaoticNeutral", label: "Chaotic Neutral" },
+  { value: "LawfulEvil", label: "Lawful Evil" },
+  { value: "NeutralEvil", label: "Neutral Evil" },
+  { value: "ChaoticEvil", label: "Chaotic Evil" },
 ];
 
 const PRONOUNS = [
-  "He/Him",
-  "She/Her",
-  "They/Them",
-  "He/They",
-  "She/They",
-  "Any/All",
+  { value: "HeHim", label: "He/Him" },
+  { value: "SheHer", label: "She/Her" },
+  { value: "TheyThem", label: "They/Them" },
+  { value: "HeThey", label: "He/They" },
+  { value: "SheThey", label: "She/They" },
+  { value: "AnyAll", label: "Any/All" },
 ];
+
+interface CharacterDetailsCardProps {
+  name: string;
+  alignment: string | undefined;
+  pronouns: string | undefined;
+  nameError?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  onNameChange: (value: string) => void;
+  onAlignmentChange: (value: string) => void;
+  onPronounsChange: (value: string) => void;
+}
 
 export function CharacterDetailsCard({
   name,
@@ -42,17 +55,7 @@ export function CharacterDetailsCard({
   onNameChange,
   onAlignmentChange,
   onPronounsChange,
-}: {
-  name: string;
-  alignment: string | undefined;
-  pronouns: string | undefined;
-  nameError?: string;
-  className?: string;
-  style?: React.CSSProperties;
-  onNameChange: (value: string) => void;
-  onAlignmentChange: (value: string) => void;
-  onPronounsChange: (value: string) => void;
-}) {
+}: CharacterDetailsCardProps) {
   return (
     <div
       style={style}
@@ -81,13 +84,17 @@ export function CharacterDetailsCard({
           onValueChange={(value) => value && onAlignmentChange(value)}
         >
           <SelectTrigger size='sm' className='w-auto'>
-            <SelectValue placeholder='Alignment' />
+            <SelectValue placeholder='Alignment'>
+              {(value: string) =>
+                ALIGNMENTS.find((option) => option.value === value)?.label
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectPopup>
             <SelectScrollUpArrow />
             {ALIGNMENTS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
             <SelectScrollDownArrow />
@@ -99,13 +106,17 @@ export function CharacterDetailsCard({
           onValueChange={(value) => value && onPronounsChange(value)}
         >
           <SelectTrigger size='sm' className='w-auto'>
-            <SelectValue placeholder='Pronouns' />
+            <SelectValue placeholder='Pronouns'>
+              {(value: string) =>
+                PRONOUNS.find((option) => option.value === value)?.label
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectPopup>
             <SelectScrollUpArrow />
             {PRONOUNS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
             <SelectScrollDownArrow />

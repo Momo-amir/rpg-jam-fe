@@ -6,15 +6,19 @@ import { ChoiceModal } from "./ChoiceModal";
 import { Tag } from "@/components/ui/tag";
 import type { ActiveChoice } from "@/models/types/character-builder.types";
 
-export type { ActiveChoice };
-
 interface ChoiceTagsProps {
   choices: ActiveChoice[];
   selected: Record<string, string | string[]>;
   onChoiceConfirm: (key: string, value: string | string[]) => void;
+  showErrors?: boolean;
 }
 
-export function ChoiceTags({ choices, selected, onChoiceConfirm }: ChoiceTagsProps) {
+export function ChoiceTags({
+  choices,
+  selected,
+  onChoiceConfirm,
+  showErrors = false,
+}: ChoiceTagsProps) {
   const [activeChoice, setActiveChoice] = useState<ActiveChoice | null>(null);
 
   return (
@@ -43,7 +47,7 @@ export function ChoiceTags({ choices, selected, onChoiceConfirm }: ChoiceTagsPro
               label={done
                 ? chosenLabel ? `${choice.title}: ${chosenLabel}` : choice.title
                 : `${choice.title} (${count}/${choice.numberOfChoices})`}
-              variant={done ? "active" : "pending"}
+              variant={done ? "active" : showErrors ? "error" : "pending"}
               onClick={() => setActiveChoice(choice)}
             />
           );

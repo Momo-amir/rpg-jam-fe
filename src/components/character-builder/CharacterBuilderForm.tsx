@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, Shield, Wand2 } from "lucide-react";
@@ -12,87 +12,13 @@ import { ChoiceTags } from "./ChoiceTags";
 import { CharacterCreationCard } from "./CharacterCreationCard";
 import { CharacterDetailsCard } from "./CharacterDetailsCard";
 import { ProficienciesPanel } from "./ProficienciesPanel";
-import { FEATURE_LABELS } from "./feature-labels";
-import {
-  CHARACTER_SECTIONS,
-  FIELD_BY_KEY,
-  mapClass,
-  mapSpecies,
-  mapBackground,
-} from "./character-sections.config";
-import {
-  normalizeClassChoices,
-  normalizeSpeciesChoices,
-  normalizeBackgroundChoices,
-} from "./normalizeChoices";
+import { useCharacterBuilder } from "./useCharacterBuilder";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
 import { createCharacter } from "@/utils/api/characters";
-import {
-  fetchClasses,
-  fetchSpecies,
-  fetchSpeciesByKey,
-  fetchBackgrounds,
-  fetchBackground,
-  fetchClass,
-} from "@/utils/api/character-options";
-import type {
-  CharacterBuilderFormValues as FormValues,
-  ClassListItem,
-  ClassTemplate,
-  SpeciesListItem,
-  SpeciesTemplate,
-  BackgroundListItem,
-  BackgroundTemplate,
-} from "@/models/types/character-builder.types";
-
-const HEAVY_ARMOR_KEYS = ["chain-mail", "splint", "plate", "ring-mail"];
-const MEDIUM_ARMOR_KEYS = [
-  "chain-shirt",
-  "scale-mail",
-  "breastplate",
-  "half-plate",
-  "hide",
-];
-const LIGHT_ARMOR_KEYS = ["leather", "padded", "studded-leather-armor"];
-
-function deriveAc(
-  armorTraining: string[],
-  dexMod: number,
-  chosenEquipmentItems?: string[],
-): number {
-  if (chosenEquipmentItems) {
-    if (chosenEquipmentItems.some((itemKey) => HEAVY_ARMOR_KEYS.includes(itemKey)))
-      return 16;
-    if (chosenEquipmentItems.some((itemKey) => MEDIUM_ARMOR_KEYS.includes(itemKey)))
-      return 13 + Math.min(dexMod, 2);
-    if (chosenEquipmentItems.some((itemKey) => LIGHT_ARMOR_KEYS.includes(itemKey)))
-      return 12 + dexMod;
-    return 10 + dexMod;
-  }
-  if (armorTraining.includes("Heavy")) return 16;
-  if (armorTraining.includes("Medium")) return 13 + Math.min(dexMod, 2);
-  if (armorTraining.includes("Light")) return 12 + dexMod;
-  return 10 + dexMod;
-}
+import { buildCreateCharacterPayload } from "@/utils/character";
+import type { CharacterBuilderFormValues as FormValues } from "@/models/types/character-builder.types";
 
 export function CharacterBuilderForm() {
-  const [classes, setClasses] = useState<ClassListItem[]>([]);
-  const [species, setSpecies] = useState<SpeciesListItem[]>([]);
-  const [backgrounds, setBackgrounds] = useState<BackgroundListItem[]>([]);
-  const [classTemplate, setClassTemplate] = useState<ClassTemplate | null>(
-    null,
-  );
-  const [speciesTemplate, setSpeciesTemplate] =
-    useState<SpeciesTemplate | null>(null);
-  const [backgroundTemplate, setBackgroundTemplate] =
-    useState<BackgroundTemplate | null>(null);
-
-  useEffect(() => {
-    fetchClasses().then(setClasses).catch(console.error);
-    fetchSpecies().then(setSpecies).catch(console.error);
-    fetchBackgrounds().then(setBackgrounds).catch(console.error);
-  }, []);
-
   const {
     control,
     setValue,
@@ -121,114 +47,43 @@ export function CharacterBuilderForm() {
     },
   });
 
-  const [name, alignment, pronouns, classId, speciesId, backgroundId] =
-    useWatch({
-      control,
-      name: [
-        "name",
-        "alignment",
-        "pronouns",
-        "classId",
-        "speciesId",
-        "backgroundId",
-      ],
-    });
+  const {
+    classTemplate,
+    speciesTemplate,
+    backgroundTemplate,
+    sections,
+    hasIncompleteChoices,
+    derivedHp,
+    derivedAc,
+  } = useCharacterBuilder(control, setValue);
 
+  const [name, alignment, pronouns] = useWatch({
+    control,
+    name: ["name", "alignment", "pronouns"],
+  });
   const choices = useWatch({ control, name: "choices" });
   const abilityScores = useWatch({ control, name: "abilityScores" });
 
-  const conMod = Math.floor(((abilityScores?.constitution ?? 10) - 10) / 2);
-  const dexMod = Math.floor(((abilityScores?.dexterity ?? 10) - 10) / 2);
-
-  const derivedHp = classTemplate
-    ? parseInt(classTemplate.hitDie.slice(1), 10) + conMod
-    : null;
-
-  const startingEquipmentChoice = classTemplate?.choices?.find(
-    (classChoice) => classChoice.label === FEATURE_LABELS.STARTING_EQUIPMENT,
-  );
-  const chosenGroupId = startingEquipmentChoice
-    ? (choices?.[startingEquipmentChoice.choice.id.value] as string | undefined)
-    : undefined;
-  const chosenEquipmentItems = chosenGroupId
-    ? startingEquipmentChoice?.choice.choiceGroups
-        .find((group) => group.id.value === chosenGroupId)
-        ?.groupContents.map((content) => content.referenceKey)
-    : undefined;
-
-  const derivedAc = deriveAc(
-    classTemplate?.armorTraining ?? [],
-    dexMod,
-    chosenEquipmentItems,
-  );
-
-  useEffect(() => {
-    if (!classId) return;
-    fetchClass(classId).then(setClassTemplate);
-  }, [classId]);
-
-  useEffect(() => {
-    if (!speciesId) return;
-    fetchSpeciesByKey(speciesId).then(setSpeciesTemplate);
-  }, [speciesId]);
-
-  useEffect(() => {
-    if (!backgroundId) return;
-    fetchBackground(backgroundId).then(setBackgroundTemplate);
-  }, [backgroundId]);
-
-  useEffect(() => {
-    const allChoices = [
-      ...(classTemplate ? normalizeClassChoices(classTemplate) : []),
-      ...(speciesTemplate ? normalizeSpeciesChoices(speciesTemplate) : []),
-      ...(backgroundTemplate ? normalizeBackgroundChoices(backgroundTemplate) : []),
-    ];
-    for (const choice of allChoices) {
-      if (choice.prefilledValue !== undefined) {
-        setValue(`choices.${choice.key}`, choice.prefilledValue, { shouldValidate: true });
-      }
-    }
-  }, [classTemplate, speciesTemplate, backgroundTemplate]);
-
   const [openModal, setOpenModal] = useState<string | null>(null);
+  const [choiceErrorsRequested, setChoiceErrorsRequested] = useState(false);
 
-  const sections = CHARACTER_SECTIONS.map((section) => {
-    const selectedIdByKey = {
-      class: classId,
-      species: speciesId,
-      background: backgroundId,
-    };
-    const listByKey = {
-      class: classes.map(mapClass),
-      species: species.map(mapSpecies),
-      background: backgrounds.map(mapBackground),
-    };
-
-    const selectedId = selectedIdByKey[section.key] ?? "";
-    const list = listByKey[section.key];
-    const selectedName = list.find((item) => item.id === selectedId)?.name;
-    const selectedImage = list.find((item) => item.id === selectedId)?.image;
-
-    return {
-      ...section,
-      list,
-      selectedId,
-      selectedName,
-      selectedImage,
-      field: FIELD_BY_KEY[section.key],
-      choices:
-        section.key === "class" && classTemplate
-          ? normalizeClassChoices(classTemplate)
-          : section.key === "species" && speciesTemplate
-            ? normalizeSpeciesChoices(speciesTemplate)
-            : section.key === "background" && backgroundTemplate
-              ? normalizeBackgroundChoices(backgroundTemplate)
-              : [],
-    };
-  });
+  // Only flag incomplete tags once the user has tried to submit; clears itself
+  // automatically once everything is chosen (no effect needed — pure derivation).
+  const showChoiceErrors = choiceErrorsRequested && hasIncompleteChoices;
 
   async function onSubmit(data: FormValues) {
-    await createCharacter(data);
+    if (hasIncompleteChoices) {
+      setChoiceErrorsRequested(true);
+      return;
+    }
+    const payload = buildCreateCharacterPayload(data, {
+      classTemplate,
+      speciesTemplate,
+      backgroundTemplate,
+      derivedHp,
+      derivedAc,
+    });
+    await createCharacter(payload);
   }
 
   return (
@@ -253,14 +108,13 @@ export function CharacterBuilderForm() {
             displayValue={section.selectedName}
             onClick={() => setOpenModal(section.key)}
             className='col-span-6 md:col-span-4 md:col-start-1'
-            error={
-              !!errors[section.field as "classId" | "speciesId" | "backgroundId"]
-            }
+            error={!!errors[section.field]}
           >
             {section.choices.length > 0 && (
               <ChoiceTags
                 choices={section.choices}
                 selected={choices}
+                showErrors={showChoiceErrors}
                 onChoiceConfirm={(key, value) =>
                   setValue(`choices.${key}`, value, { shouldValidate: true })
                 }
@@ -351,9 +205,9 @@ export function CharacterBuilderForm() {
 
       <div className='flex items-center justify-between border-t border-white/10 pt-6'>
         <div className='text-helper text-primary/60'>
-          {Object.keys(errors).length > 0 && (
+          {(Object.keys(errors).length > 0 || showChoiceErrors) && (
             <span className='text-error'>
-              Please fill in all required fields.
+              Please fill in all required fields and choices.
             </span>
           )}
         </div>
