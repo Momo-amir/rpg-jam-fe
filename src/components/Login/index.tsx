@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loginSchema, LoginFormValues } from "@/models/schemas/auth";
+import { loginSchema, LoginFormValues } from "@/types/auth";
 import { login as userLogin } from "@/utils/api/auth";
 
 export const LoginComponent: React.FC = () => {

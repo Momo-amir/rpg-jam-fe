@@ -70,9 +70,9 @@ src/
 ├── utils/api/
 │   ├── character-options.ts                 — fetch functions (lists + templates)
 │   └── character-images.ts                  — API id → StaticImageData lookup tables
-└── models/
-    ├── schemas/character-builder.ts         — Zod schemas mirroring API shapes
-    └── types/character-builder.types.ts     — types inferred from the schemas
+└── types/character/                         — Zod schemas + inferred types (one barrel: @/types/character)
+    ├── enums.ts, choices.ts, class.ts, …    — schemas mirroring API shapes, split by area
+    └── index.ts                             — barrel; see docs/zod.md for the type conventions
 ```
 
 ---

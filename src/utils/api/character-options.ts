@@ -7,7 +7,7 @@ import {
   speciesTemplateSchema,
   backgroundListItemSchema,
   backgroundTemplateSchema,
-} from "@/models/schemas/character-builder";
+} from "@/types/character";
 import type {
   ClassListItem,
   ClassTemplate,
@@ -15,7 +15,7 @@ import type {
   SpeciesTemplate,
   BackgroundListItem,
   BackgroundTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 
 export async function fetchClasses(): Promise<ClassListItem[]> {
   const response = await apiClient.get("/api/classes/all");

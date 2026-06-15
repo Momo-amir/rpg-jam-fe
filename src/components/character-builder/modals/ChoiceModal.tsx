@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/ui/modal";
 import { OptionCardList } from "@/components/character-builder/modals/OptionCardList";
-import type { OptionItem } from "@/models/types/character-builder.types";
+import type { OptionItem } from "@/types/character";
 
 interface ChoiceModalProps {
   open: boolean;

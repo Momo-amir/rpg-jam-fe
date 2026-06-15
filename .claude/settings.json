@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(cd /Users/momo/Repos/rpg-jam-be 2>/dev/null && echo \"=== classes.json \\(first class, skill choice area\\) ===\" && grep -n -A2 -B2 -i \"SkillProficiency\\\\|referenceKey\\\\|\\\\\"Name\\\\\"\" data/content/classes.json | head -60)",
-      "Read(//Users/momo/Repos/rpg-jam-be/**)"
+      "Read(//Users/momo/Repos/rpg-jam-be/**)",
+      "Bash(npm run *)"
     ]
   }
 }

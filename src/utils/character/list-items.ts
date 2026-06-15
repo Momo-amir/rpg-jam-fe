@@ -2,7 +2,7 @@ import type {
   ClassListItem,
   SpeciesListItem,
   BackgroundListItem,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 import {
   classImages,
   speciesImages,

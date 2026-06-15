@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import { userSchema, type User } from "@/models/schemas/user";
+import { userSchema, type User } from "@/types/user";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 

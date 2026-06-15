@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { setOnAuthFailure } from "@/utils/api/client";
 import { useAuthStore } from "@/store/auth";
-import { type User } from "@/models/schemas/user";
+import { type User } from "@/types/user";
 
 interface AuthProviderProps {
   children: React.ReactNode;

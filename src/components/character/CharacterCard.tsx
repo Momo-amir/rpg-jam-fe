@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { User } from "lucide-react";
-import type { Character } from "@/models/types/character-builder.types";
+import type { Character } from "@/types/character";
 
 interface CharacterCardProps {
   character: Character;

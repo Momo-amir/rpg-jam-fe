@@ -1,6 +1,6 @@
 import { Sword, User, BookOpen } from "lucide-react";
 
-import type { CharacterSectionConfig } from "@/models/types/character-builder.types";
+import type { CharacterSectionConfig } from "@/types/character";
 import bardImage from "@/public/assets/bard.png";
 import humanImage from "@/public/assets/human.png";
 import soldierImage from "@/public/assets/soldier.png";

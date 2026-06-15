@@ -5,7 +5,7 @@ import type {
   ClassTemplate,
   SpeciesTemplate,
   BackgroundTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 import { aggregateProficiencies, type SelectedChoices } from "@/utils/character";
 import { ProficiencyCard } from "@/components/character-builder/panels/ProficiencyCard";
 

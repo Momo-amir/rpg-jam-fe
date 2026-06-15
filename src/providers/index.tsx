@@ -2,7 +2,7 @@ import React from "react";
 
 import { AuthProvider } from "./AuthProvider";
 import { ThemeProvider } from "./Theme";
-import { type User } from "@/models/schemas/user";
+import { type User } from "@/types/user";
 
 export const Providers: React.FC<{
   children: React.ReactNode;

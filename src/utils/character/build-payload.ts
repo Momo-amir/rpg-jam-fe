@@ -4,7 +4,7 @@ import type {
   ClassTemplate,
   SpeciesTemplate,
   BackgroundTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 import { toPascalCase, toPascalCaseList } from "./backend-enums";
 import { FEATURE_LABELS } from "./feature-labels";
 import {
@@ -152,7 +152,9 @@ export function buildCreateCharacterPayload(
       hitDice: hitDie,
     },
     background: backgroundTemplate?.name ?? "",
-    class: classTemplate?.name ?? "",
+    class: {
+      class: classTemplate?.name ?? "",
+    },
     speciesTraits: {
       creatureType: speciesTemplate?.creatureType ?? "",
       size: chosenSize ? toPascalCase(chosenSize) : "",

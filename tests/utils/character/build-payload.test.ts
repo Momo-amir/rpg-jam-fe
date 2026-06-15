@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCreateCharacterPayload } from "./build-payload";
+import { buildCreateCharacterPayload } from "@/utils/character/build-payload";
 import { fighter, human, soldier, form } from "./__fixtures__/character-templates";
 
 describe("buildCreateCharacterPayload", () => {
@@ -12,7 +12,7 @@ describe("buildCreateCharacterPayload", () => {
   });
 
   it("emits backend enum values verbatim for API-sourced fields", () => {
-    expect(payload.class).toBe("Fighter");
+    expect(payload.class.class).toBe("Fighter");
     expect(payload.background).toBe("Soldier");
     expect(payload.speciesTraits.creatureType).toBe("Humanoid");
   });

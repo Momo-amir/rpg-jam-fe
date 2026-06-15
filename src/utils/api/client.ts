@@ -2,7 +2,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { OnAuthFailure } from "@/models/types/api.types";
+import { OnAuthFailure } from "@/types/api";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -49,7 +49,7 @@ apiClient.interceptors.response.use(
       error.response?.data?.message ??
       error.message ??
       "Unexpected server error";
-    const isRefreshRequest = originalRequest?.url === "/api/auth/refresh";
+    const isRefreshRequest = originalRequest?.url === "/api/refresh";
     const isLogoutRequest = originalRequest?.url === "/api/logout";
 
     if (
