@@ -62,7 +62,7 @@ export function CharacterDetailsCard({
         className,
       )}
     >
-      <span className='text-helper font-medium uppercase tracking-wider text-neutraltwo'>
+      <span className='text-helper font-medium uppercase tracking-wider text-primary/60'>
         Character Details
       </span>
 
@@ -71,11 +71,11 @@ export function CharacterDetailsCard({
         value={name}
         onChange={(event) => onNameChange(event.target.value)}
         placeholder='Enter a name...'
-        className='w-full bg-transparent text-h3 font-h3 leading-h3 text-primary outline-none placeholder:text-neutraltwo'
+        className='w-full bg-transparent text-h3 font-h3 leading-h3 text-primary outline-none placeholder:text-primary/40'
       />
       {nameError && <p className='error-text'>{nameError}</p>}
 
-      <div className='flex gap-2 border-t border-white/10 pt-3'>
+      <div className='flex flex-col lg:flex-row gap-2 border-t border-white/10 pt-3'>
         <Select
           value={alignment ?? ""}
           onValueChange={(value) => value && onAlignmentChange(value)}

@@ -9,13 +9,19 @@ interface TagProps {
   className?: string;
 }
 
-export function Tag({ label, onClick, variant = "default", className }: TagProps) {
-  const base = "rounded-md px-2 py-0.5 text-[0.75rem] font-medium backdrop-blur-sm transition-colors";
+export function Tag({
+  label,
+  onClick,
+  variant = "default",
+  className,
+}: TagProps) {
+  const base =
+    "rounded-md px-2 py-0.5 text-[0.75rem] font-medium backdrop-blur-sm transition-colors";
 
   const variants = {
-    default: "bg-white/10 text-white/80",
-    active: "bg-secondary/30 text-secondary hover:bg-secondary/40",
-    pending: "bg-white/10 text-white/70 hover:bg-white/20",
+    default: "bg-primary/10 text-primary/80",
+    active: "bg-secondary/30 text-accenttwo hover:bg-secondary/40",
+    pending: "bg-primary/10 text-white/70 hover:bg-white/20",
   };
 
   if (onClick) {

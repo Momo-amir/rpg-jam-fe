@@ -41,7 +41,7 @@ export function OptionCard({
         src={imageSrc}
         alt=''
         fill
-        className='object-cover object-center transition-transform duration-500 group-hover:scale-105'
+        className='object-cover object-top transition-transform duration-500 group-hover:scale-105'
       />
       <div
         className={cn(
@@ -77,9 +77,15 @@ export function OptionCard({
         </p>
         {option.tags && option.tags.length > 0 && (
           <div className='mt-1 flex flex-wrap gap-1'>
-            {option.tags.map((tag) => (
-              <Tag key={tag} label={tag} />
-            ))}
+            {(Array.isArray(option.tags) ? option.tags : [option.tags]).map(
+              (tag) => (
+                <Tag
+                  key={tag}
+                  label={tag}
+                  className='bg-white/10 text-white/80'
+                />
+              ),
+            )}
           </div>
         )}
       </div>

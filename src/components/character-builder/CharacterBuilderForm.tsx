@@ -1,23 +1,98 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Heart, Shield, Sparkles, Wand2 } from "lucide-react";
+import { Heart, Shield, Wand2 } from "lucide-react";
 import Statbox, { Stats } from "@/components/ui/statbox";
 
 import { Button } from "@/components/ui/button";
 import { ChoiceModal } from "./ChoiceModal";
+import { ChoiceTags } from "./ChoiceTags";
 import { CharacterCreationCard } from "./CharacterCreationCard";
 import { CharacterDetailsCard } from "./CharacterDetailsCard";
-import { CHARACTER_SECTIONS } from "./character-sections.config";
+import { ProficienciesPanel } from "./ProficienciesPanel";
+import { FEATURE_LABELS } from "./feature-labels";
+import {
+  CHARACTER_SECTIONS,
+  FIELD_BY_KEY,
+  mapClass,
+  mapSpecies,
+  mapBackground,
+} from "./character-sections.config";
+import {
+  normalizeClassChoices,
+  normalizeSpeciesChoices,
+  normalizeBackgroundChoices,
+} from "./normalizeChoices";
 import { characterBuilderSchema } from "@/models/schemas/character-builder";
+import { createCharacter } from "@/utils/api/characters";
+import {
+  fetchClasses,
+  fetchSpecies,
+  fetchSpeciesByKey,
+  fetchBackgrounds,
+  fetchBackground,
+  fetchClass,
+} from "@/utils/api/character-options";
 import type {
   CharacterBuilderFormValues as FormValues,
-  CharacterSectionKey,
+  ClassListItem,
+  ClassTemplate,
+  SpeciesListItem,
+  SpeciesTemplate,
+  BackgroundListItem,
+  BackgroundTemplate,
 } from "@/models/types/character-builder.types";
 
+const HEAVY_ARMOR_KEYS = ["chain-mail", "splint", "plate", "ring-mail"];
+const MEDIUM_ARMOR_KEYS = [
+  "chain-shirt",
+  "scale-mail",
+  "breastplate",
+  "half-plate",
+  "hide",
+];
+const LIGHT_ARMOR_KEYS = ["leather", "padded", "studded-leather-armor"];
+
+function deriveAc(
+  armorTraining: string[],
+  dexMod: number,
+  chosenEquipmentItems?: string[],
+): number {
+  if (chosenEquipmentItems) {
+    if (chosenEquipmentItems.some((itemKey) => HEAVY_ARMOR_KEYS.includes(itemKey)))
+      return 16;
+    if (chosenEquipmentItems.some((itemKey) => MEDIUM_ARMOR_KEYS.includes(itemKey)))
+      return 13 + Math.min(dexMod, 2);
+    if (chosenEquipmentItems.some((itemKey) => LIGHT_ARMOR_KEYS.includes(itemKey)))
+      return 12 + dexMod;
+    return 10 + dexMod;
+  }
+  if (armorTraining.includes("Heavy")) return 16;
+  if (armorTraining.includes("Medium")) return 13 + Math.min(dexMod, 2);
+  if (armorTraining.includes("Light")) return 12 + dexMod;
+  return 10 + dexMod;
+}
+
 export function CharacterBuilderForm() {
+  const [classes, setClasses] = useState<ClassListItem[]>([]);
+  const [species, setSpecies] = useState<SpeciesListItem[]>([]);
+  const [backgrounds, setBackgrounds] = useState<BackgroundListItem[]>([]);
+  const [classTemplate, setClassTemplate] = useState<ClassTemplate | null>(
+    null,
+  );
+  const [speciesTemplate, setSpeciesTemplate] =
+    useState<SpeciesTemplate | null>(null);
+  const [backgroundTemplate, setBackgroundTemplate] =
+    useState<BackgroundTemplate | null>(null);
+
+  useEffect(() => {
+    fetchClasses().then(setClasses).catch(console.error);
+    fetchSpecies().then(setSpecies).catch(console.error);
+    fetchBackgrounds().then(setBackgrounds).catch(console.error);
+  }, []);
+
   const {
     control,
     setValue,
@@ -40,45 +115,158 @@ export function CharacterBuilderForm() {
         charisma: 10,
       },
       choices: {},
-      proficiencies: [],
       alignment: undefined,
       pronouns: undefined,
       portraitUrl: undefined,
     },
   });
 
-  const [name, alignment, pronouns] = useWatch({
-    control,
-    name: ["name", "alignment", "pronouns"],
+  const [name, alignment, pronouns, classId, speciesId, backgroundId] =
+    useWatch({
+      control,
+      name: [
+        "name",
+        "alignment",
+        "pronouns",
+        "classId",
+        "speciesId",
+        "backgroundId",
+      ],
+    });
+
+  const choices = useWatch({ control, name: "choices" });
+  const abilityScores = useWatch({ control, name: "abilityScores" });
+
+  const conMod = Math.floor(((abilityScores?.constitution ?? 10) - 10) / 2);
+  const dexMod = Math.floor(((abilityScores?.dexterity ?? 10) - 10) / 2);
+
+  const derivedHp = classTemplate
+    ? parseInt(classTemplate.hitDie.slice(1), 10) + conMod
+    : null;
+
+  const startingEquipmentChoice = classTemplate?.choices?.find(
+    (classChoice) => classChoice.label === FEATURE_LABELS.STARTING_EQUIPMENT,
+  );
+  const chosenGroupId = startingEquipmentChoice
+    ? (choices?.[startingEquipmentChoice.choice.id.value] as string | undefined)
+    : undefined;
+  const chosenEquipmentItems = chosenGroupId
+    ? startingEquipmentChoice?.choice.choiceGroups
+        .find((group) => group.id.value === chosenGroupId)
+        ?.groupContents.map((content) => content.referenceKey)
+    : undefined;
+
+  const derivedAc = deriveAc(
+    classTemplate?.armorTraining ?? [],
+    dexMod,
+    chosenEquipmentItems,
+  );
+
+  useEffect(() => {
+    if (!classId) return;
+    fetchClass(classId).then(setClassTemplate);
+  }, [classId]);
+
+  useEffect(() => {
+    if (!speciesId) return;
+    fetchSpeciesByKey(speciesId).then(setSpeciesTemplate);
+  }, [speciesId]);
+
+  useEffect(() => {
+    if (!backgroundId) return;
+    fetchBackground(backgroundId).then(setBackgroundTemplate);
+  }, [backgroundId]);
+
+  useEffect(() => {
+    const allChoices = [
+      ...(classTemplate ? normalizeClassChoices(classTemplate) : []),
+      ...(speciesTemplate ? normalizeSpeciesChoices(speciesTemplate) : []),
+      ...(backgroundTemplate ? normalizeBackgroundChoices(backgroundTemplate) : []),
+    ];
+    for (const choice of allChoices) {
+      if (choice.prefilledValue !== undefined) {
+        setValue(`choices.${choice.key}`, choice.prefilledValue, { shouldValidate: true });
+      }
+    }
+  }, [classTemplate, speciesTemplate, backgroundTemplate]);
+
+  const [openModal, setOpenModal] = useState<string | null>(null);
+
+  const sections = CHARACTER_SECTIONS.map((section) => {
+    const selectedIdByKey = {
+      class: classId,
+      species: speciesId,
+      background: backgroundId,
+    };
+    const listByKey = {
+      class: classes.map(mapClass),
+      species: species.map(mapSpecies),
+      background: backgrounds.map(mapBackground),
+    };
+
+    const selectedId = selectedIdByKey[section.key] ?? "";
+    const list = listByKey[section.key];
+    const selectedName = list.find((item) => item.id === selectedId)?.name;
+    const selectedImage = list.find((item) => item.id === selectedId)?.image;
+
+    return {
+      ...section,
+      list,
+      selectedId,
+      selectedName,
+      selectedImage,
+      field: FIELD_BY_KEY[section.key],
+      choices:
+        section.key === "class" && classTemplate
+          ? normalizeClassChoices(classTemplate)
+          : section.key === "species" && speciesTemplate
+            ? normalizeSpeciesChoices(speciesTemplate)
+            : section.key === "background" && backgroundTemplate
+              ? normalizeBackgroundChoices(backgroundTemplate)
+              : [],
+    };
   });
 
-  const [openModal, setOpenModal] = useState<CharacterSectionKey | null>(null);
-
-  function onSubmit(data: FormValues) {
-    console.log("Character form submit:", data);
+  async function onSubmit(data: FormValues) {
+    await createCharacter(data);
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
       <div className='flex flex-col gap-2'>
         <h1>Create Your Character</h1>
-        <p className='text-neutraltwo'>
+        <p className='text-primary/60'>
           Build a level 1 character by filling in the sections below. Click any
           card to make your selections.
         </p>
       </div>
 
       <div className='grid grid-cols-6 grid-rows-3 gap-4'>
-        {CHARACTER_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <CharacterCreationCard
             key={section.key}
             label={section.label}
             description={section.description}
             icon={section.icon}
-            backgroundImage={section.placeholderImage}
+            backgroundImage={section.selectedImage ?? section.placeholderImage}
+            grayscale={!section.selectedImage}
+            displayValue={section.selectedName}
             onClick={() => setOpenModal(section.key)}
             className='col-span-6 md:col-span-4 md:col-start-1'
-          />
+            error={
+              !!errors[section.field as "classId" | "speciesId" | "backgroundId"]
+            }
+          >
+            {section.choices.length > 0 && (
+              <ChoiceTags
+                choices={section.choices}
+                selected={choices}
+                onChoiceConfirm={(key, value) =>
+                  setValue(`choices.${key}`, value, { shouldValidate: true })
+                }
+              />
+            )}
+          </CharacterCreationCard>
         ))}
 
         <div className='col-span-6 row-start-1 flex flex-col gap-3 md:col-span-2 md:col-start-5'>
@@ -99,47 +287,70 @@ export function CharacterBuilderForm() {
             }
           />
 
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='grid lg:grid-cols-2 gap-4'>
             <CharacterCreationCard
               label='Hit Points'
-              description='How much damage you can take.'
+              description={
+                derivedHp !== null ? `${derivedHp} HP` : "Choose a class"
+              }
               icon={<Heart size={20} />}
               className='h-full'
             />
             <CharacterCreationCard
               label='Armor Class'
-              description='How hard you are to hit.'
+              description={`${derivedAc} AC`}
               icon={<Shield size={20} />}
               className='h-full'
             />
           </div>
         </div>
 
-        <div className='col-span-6 row-start-2 grid grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
+        <div className='col-span-6 row-start-2 grid grid-cols-2 lg:grid-cols-3 gap-4 md:col-span-2 md:col-start-5'>
           {Stats.map((stat) => (
-            <Statbox key={stat.id} icon={stat.icon} shortname={stat.shortname} />
+            <Statbox
+              key={stat.id}
+              icon={stat.icon}
+              shortname={stat.shortname}
+              value={
+                abilityScores?.[stat.field as keyof typeof abilityScores] ?? 10
+              }
+              onChange={(value) =>
+                setValue(
+                  `abilityScores.${stat.field as keyof typeof abilityScores}`,
+                  value,
+                  { shouldValidate: true },
+                )
+              }
+            />
           ))}
         </div>
 
-        <CharacterCreationCard
-          label='Proficiencies'
-          description='Proficiencies will appear here once you select a class and background.'
-          icon={<Sparkles size={20} />}
-          className='col-span-6 row-start-3 md:col-span-2 md:col-start-5'
+        <ProficienciesPanel
+          classTemplate={classTemplate}
+          speciesTemplate={speciesTemplate}
+          backgroundTemplate={backgroundTemplate}
+          choices={choices ?? {}}
         />
       </div>
 
-      {CHARACTER_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <ChoiceModal
           key={section.key}
           open={openModal === section.key}
           onOpenChange={(open) => setOpenModal(open ? section.key : null)}
           title={section.modalTitle}
+          options={section.list}
+          numberOfChoices={1}
+          selected={section.selectedId || undefined}
+          onConfirm={(value) => {
+            setValue(section.field, value as string, { shouldValidate: true });
+            setOpenModal(null);
+          }}
         />
       ))}
 
       <div className='flex items-center justify-between border-t border-white/10 pt-6'>
-        <div className='text-helper text-neutraltwo'>
+        <div className='text-helper text-primary/60'>
           {Object.keys(errors).length > 0 && (
             <span className='text-error'>
               Please fill in all required fields.

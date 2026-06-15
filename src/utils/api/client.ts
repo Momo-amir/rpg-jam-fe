@@ -6,7 +6,7 @@ import { OnAuthFailure } from "@/models/types/api.types";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // this is the request part of the setup, we need to only handle response
+  withCredentials: true,
 });
 
 let onAuthFailure: OnAuthFailure = () => {};
@@ -70,7 +70,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await apiClient.post("/api/auth/refresh");
+        await apiClient.post("/api/refresh");
         isRefreshing = false;
         retryQueuedRequests();
         return apiClient(originalRequest);
