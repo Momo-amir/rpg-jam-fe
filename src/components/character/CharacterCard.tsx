@@ -1,10 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import { User } from "lucide-react";
 import type { Character } from "@/models/types/character-builder.types";
 
 interface CharacterCardProps {
   character: Character;
 }
+// WIP dont tak3e this seriously ar all lol
 
 export function CharacterCard({ character }: CharacterCardProps) {
   return (
@@ -14,9 +16,11 @@ export function CharacterCard({ character }: CharacterCardProps) {
     >
       <div className='flex items-center gap-4'>
         {character.portraitUrl ? (
-          <img
+          <Image
             src={character.portraitUrl}
             alt={character.name}
+            width={56}
+            height={56}
             className='size-14 rounded-full object-cover'
           />
         ) : (
@@ -27,7 +31,8 @@ export function CharacterCard({ character }: CharacterCardProps) {
         <div className='flex flex-col gap-0.5'>
           <h3 className='text-base font-semibold'>{character.name}</h3>
           <p className='text-helper text-primary/60'>
-            Level {character.level} · {character.classId} · {character.speciesId}
+            Level {character.level} · {character.classId} ·{" "}
+            {character.speciesId}
           </p>
         </div>
       </div>
