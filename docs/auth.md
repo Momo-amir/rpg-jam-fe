@@ -30,16 +30,16 @@ C#.
 
 ## The pieces
 
-| File | Job |
-|---|---|
-| [src/proxy.ts](../src/proxy.ts) | Edge gate. Runs on every request, `jwtVerify`s the cookie, redirects. |
-| [src/lib/session.ts](../src/lib/session.ts) | `getSession()` — server-side: decode the cookie → `User \| null`. Cached per request. |
-| [src/lib/guard.ts](../src/lib/guard.ts) | `verifySession()` (redirect if no user) and `verifyRole()` (post-MVP placeholder). |
-| [src/store/auth.ts](../src/store/auth.ts) | Zustand store. Holds the decoded `user` in memory — never the token. |
-| [src/providers/AuthProvider.tsx](../src/providers/AuthProvider.tsx) | Seeds the store from the server on load + wires the 401 callback. |
-| [src/utils/api/auth.ts](../src/utils/api/auth.ts) | `login()`, `register()`, `logout()` — call C# and update the store. |
-| [src/utils/api/client.ts](../src/utils/api/client.ts) | The Axios instance + the 401 refresh interceptor. |
-| [src/hooks/useSession.ts](../src/hooks/useSession.ts) | `useSession()` — read the user from the store on the client. No network. |
+| File                                                                | Job                                                                                   |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [src/proxy.ts](../src/proxy.ts)                                     | Edge gate. Runs on every request, `jwtVerify`s the cookie, redirects.                 |
+| [src/lib/session.ts](../src/lib/session.ts)                         | `getSession()` — server-side: decode the cookie → `User \| null`. Cached per request. |
+| [src/lib/guard.ts](../src/lib/guard.ts)                             | `verifySession()` (redirect if no user) and `verifyRole()` (post-MVP placeholder).    |
+| [src/store/auth.ts](../src/store/auth.ts)                           | Zustand store. Holds the decoded `user` in memory — never the token.                  |
+| [src/providers/AuthProvider.tsx](../src/providers/AuthProvider.tsx) | Seeds the store from the server on load + wires the 401 callback.                     |
+| [src/utils/api/auth.ts](../src/utils/api/auth.ts)                   | `login()`, `register()`, `logout()` — call C# and update the store.                   |
+| [src/utils/api/client.ts](../src/utils/api/client.ts)               | The Axios instance + the 401 refresh interceptor.                                     |
+| [src/hooks/useSession.ts](../src/hooks/useSession.ts)               | `useSession()` — read the user from the store on the client. No network.              |
 
 ---
 
@@ -144,16 +144,3 @@ C# returning roles in the JWT.
   `session.ts`.
 
 ---
-
-## Where CLAUDE.md is out of date
-
-CLAUDE.md's Auth section predates the implementation. Trust the code; these are
-the specific drifts (this doc reflects reality):
-
-| CLAUDE.md says | Actually |
-|---|---|
-| Endpoints are `/api/auth/login`, `/api/auth/register`, `/api/auth/refresh`, … | `/api/login`, `/api/register`, `/api/refresh`, `/api/logout` (no `/auth/` prefix) |
-| The DAL lives in `src/lib/dal.ts` | It's `src/lib/guard.ts` (`verifySession`/`verifyRole`) |
-| The `(app)` layout calls `verifySession()` | The root layout calls `getSession()`; `proxy.ts` does the redirecting |
-| `useSession()` returns `{ user, isLoading: false }` | Returns `{ user, isLoggedIn }` |
-| Register lands on `/dashboard` | Register redirects to `/login` |
