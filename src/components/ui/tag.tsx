@@ -5,7 +5,7 @@ import { cn } from "@/utils/cn";
 interface TagProps {
   label: string;
   onClick?: () => void;
-  variant?: "default" | "active" | "pending";
+  variant?: "default" | "active" | "pending" | "error";
   className?: string;
 }
 
@@ -22,6 +22,7 @@ export function Tag({
     default: "bg-primary/10 text-primary/80",
     active: "bg-secondary/30 text-accenttwo hover:bg-secondary/40",
     pending: "bg-primary/10 text-white/70 hover:bg-white/20",
+    error: "bg-error/20 text-error ring-1 ring-error/50 hover:bg-error/30",
   };
 
   if (onClick) {

@@ -7,11 +7,11 @@ export const FEATURE_LABELS = {
   SPELLCASTING: "Cantrips",
   FIGHTING_STYLE: "Fighting Style",
   WEAPON_MASTERY: "Weapon Mastery",
-  TOOL_PROFICIENCY: "Tool Proficiency",
-  ABILITY_SCORE_IMPROVEMENT: "Ability Score Improvement",
+  TOOL_PROFICIENCY: "Tool Proficiencies",
+  ABILITY_SCORE_IMPROVEMENT: "Ability",
 } as const;
 
-// Maps raw API feature names to display labels for normalizeChoices.ts
+// Maps raw API feature names to display labels for normalize-choices.ts
 export const FEATURE_LABEL_OVERRIDES: Record<string, string> = {
   Spellcasting: FEATURE_LABELS.SPELLCASTING,
   FightingStyle: FEATURE_LABELS.FIGHTING_STYLE,

@@ -53,11 +53,6 @@ export const diceTypeSchema = z.enum([
 
 // ─── API response shapes ──────────────────────────────────────────────────────
 
-export const skillChoiceSchema = z.object({
-  numberOfChoices: z.number(),
-  options: z.array(z.string()),
-});
-
 const groupIdSchema = z.object({ value: z.string() });
 
 const groupContentSchema = z.object({
@@ -125,16 +120,12 @@ export const speciesListItemSchema = z.object({
 });
 
 export const speciesTemplateSchema = z.object({
-  id: groupIdSchema.optional(),
   key: z.string(),
   name: z.string(),
   creatureType: z.string().optional(),
   speed: z.number().optional(),
   traits: z.array(z.string()).optional(),
-  size: choiceDetailSchema.nullable().optional(),
-  lineage: choiceDetailSchema.nullable().optional(),
-  skillful: choiceDetailSchema.nullable().optional(),
-  versatile: choiceDetailSchema.nullable().optional(),
+  choices: z.array(classChoiceSchema).optional(),
 });
 
 // ─── Background schemas ───────────────────────────────────────────────────────
@@ -148,15 +139,12 @@ export const backgroundListItemSchema = z.object({
 });
 
 export const backgroundTemplateSchema = z.object({
-  id: groupIdSchema,
   key: z.string(),
   name: z.string(),
   description: z.string().optional(),
   feat: z.string().optional(),
   skillProficiencies: z.array(z.string()).optional(),
-  ability: choiceDetailSchema.optional(),
-  toolProficiencies: choiceDetailSchema.optional(),
-  startingEquipment: choiceDetailSchema.optional(),
+  choices: z.array(classChoiceSchema).optional(),
 });
 
 // ─── Saved character ─────────────────────────────────────────────────────────
@@ -204,4 +192,64 @@ export const characterBuilderSchema = z.object({
   alignment: z.string().optional(),
   pronouns: z.string().optional(),
   portraitUrl: z.string().optional(),
+  // No UI yet, sent as "" in the payload. TODO: add inputs to send real values for these.
+  backstory: z.string().optional(),
+  appearance: z.string().optional(),
+  personality: z.string().optional(),
+});
+
+// ─── Create-character payload (backend Character entity shape) ─────────────────
+// Enum-typed fields are plain strings: we send PascalCase member names and let the
+// backend's JsonStringEnumConverter validate them.
+
+export const createCharacterPayloadSchema = z.object({
+  level: z.number(),
+  details: z.object({
+    name: z.string(),
+    pronouns: z.string(),
+    alignment: z.string(),
+    backstory: z.string(),
+    appearance: z.string(),
+    personality: z.string(),
+  }),
+  hitPoints: z.object({
+    max: z.number(),
+    hitDice: z.string(),
+  }),
+  background: z.string(),
+  class: z.string(),
+  speciesTraits: z.object({
+    creatureType: z.string(),
+    size: z.string(),
+    speed: z.number(),
+    lineage: z.string(),
+  }),
+  abilities: z.object({
+    strength: z.number(),
+    dexterity: z.number(),
+    constitution: z.number(),
+    intelligence: z.number(),
+    wisdom: z.number(),
+    charisma: z.number(),
+  }),
+  proficiencies: z.object({
+    skills: z.array(z.string()),
+    tools: z.array(z.string()),
+    weapons: z.array(z.string()),
+    armors: z.array(z.string()),
+    languages: z.array(z.string()),
+  }),
+  classFeatures: z.array(z.string()),
+  feats: z.array(z.string()),
+  weaponMasteries: z.array(z.string()).optional(),
+  cantrips: z.array(z.string()).optional(),
+  spells: z.array(z.string()).optional(),
+  armorClass: z.number(),
+  startingEquipment: z.array(
+    z.object({
+      referenceKey: z.string(),
+      quantity: z.number(),
+      type: z.string(),
+    }),
+  ),
 });

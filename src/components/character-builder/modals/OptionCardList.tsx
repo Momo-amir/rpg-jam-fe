@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { OptionCard } from "./OptionCard";
+import { OptionCard } from "@/components/character-builder/cards/OptionCard";
 import type { OptionItem } from "@/models/types/character-builder.types";
 
 interface SingleSelectProps {
