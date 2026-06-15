@@ -6,5 +6,6 @@ export * from "./class";
 export * from "./species";
 export * from "./background";
 export * from "./character";
+export * from "./card";
 export * from "./payload";
 export * from "./ui";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, Shield, Wand2 } from "lucide-react";
@@ -15,10 +16,13 @@ import { ProficienciesPanel } from "@/components/character-builder/panels/Profic
 import { useCharacterBuilder } from "@/components/character-builder/useCharacterBuilder";
 import { characterBuilderSchema } from "@/types/character";
 import { createCharacter } from "@/utils/api/characters";
+import { useToast } from "@/components/ui/toast";
 import { buildCreateCharacterPayload } from "@/utils/character";
 import type { CharacterBuilderFormValues as FormValues } from "@/types/character";
 
 export function CharacterBuilderForm() {
+  const router = useRouter();
+  const toast = useToast();
   const {
     control,
     setValue,
@@ -83,7 +87,23 @@ export function CharacterBuilderForm() {
       derivedHp,
       derivedAc,
     });
-    await createCharacter(payload);
+    try {
+      await createCharacter(payload);
+      toast.add({
+        title: "Character created",
+        description: `${data.name} is ready.`,
+        type: "success",
+      });
+      router.push("/characters");
+    } catch (error) {
+      const description =
+        error instanceof Error ? error.message : "Please try again.";
+      toast.add({
+        title: "Could not create character",
+        description,
+        type: "error",
+      });
+    }
   }
 
   return (
@@ -130,6 +150,8 @@ export function CharacterBuilderForm() {
             alignment={alignment}
             pronouns={pronouns}
             nameError={errors.name?.message}
+            alignmentError={errors.alignment?.message}
+            pronounsError={errors.pronouns?.message}
             onNameChange={(value) =>
               setValue("name", value, { shouldValidate: true })
             }

@@ -41,8 +41,8 @@ export const characterBuilderSchema = z.object({
   backgroundId: z.string().min(1, "Background is required"),
   abilityScores: abilityScoresSchema,
   choices: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
-  alignment: z.string().optional(),
-  pronouns: z.string().optional(),
+  alignment: z.string().min(1, "Alignment is required"),
+  pronouns: z.string().min(1, "Pronouns are required"),
   portraitUrl: z.string().optional(),
   // No UI yet, sent as "" in the payload. TODO: add inputs to send real values for these.
   backstory: z.string().optional(),

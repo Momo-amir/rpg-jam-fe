@@ -19,13 +19,13 @@ export const createCharacterPayloadSchema = z.object({
   }),
   background: z.string(),
   class: z.object({
-    class: z.string(),
+    type: z.string(),
   }),
   speciesTraits: z.object({
+    speciesType: z.string(),
     creatureType: z.string(),
     size: z.string(),
     speed: z.number(),
-    lineage: z.string(),
   }),
   abilities: z.object({
     strength: z.number(),

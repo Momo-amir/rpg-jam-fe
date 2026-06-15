@@ -19,8 +19,9 @@ describe("buildCreateCharacterPayload", () => {
   });
 
   it("emits backend enum values verbatim for API-sourced fields", () => {
-    expect(payload.class.class).toBe("Fighter");
+    expect(payload.class.type).toBe("Fighter");
     expect(payload.background).toBe("Soldier");
+    expect(payload.speciesTraits.speciesType).toBe("Human");
     expect(payload.speciesTraits.creatureType).toBe("Humanoid");
   });
 
@@ -75,7 +76,6 @@ describe("buildCreateCharacterPayload", () => {
     // SavageAttacker from the background's fixed feat + GreatWeaponFighting (the chosen fighting style).
     expect(payload.feats).toEqual(["SavageAttacker", "GreatWeaponFighting"]);
     expect(payload.weaponMasteries).toEqual(["Dagger"]);
-    expect(payload.speciesTraits.lineage).toBe("ForestGnome");
   });
 
   it("omits empty optional lists (Fighter has no cantrips/spells)", () => {
@@ -105,7 +105,7 @@ describe("buildCreateCharacterPayload", () => {
     );
 
     expect(gnomePayload.speciesTraits.size).toBe("Small");
-    expect(gnomePayload.speciesTraits.lineage).toBe("ForestGnome");
+    expect(gnomePayload.speciesTraits.speciesType).toBe("Gnome");
   });
 
   it("maps the nested shape with abilities and hit points", () => {

@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { fetchCharacters } from "@/utils/api/characters";
+import { fetchCharacterCards } from "@/utils/api/characters";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { buttonVariants } from "@/components/ui/button";
-import type { Character } from "@/types/character";
+import type { CharacterCard as CharacterCardData } from "@/types/character";
 
 export default function CharacterListPage() {
-  const [characters, setCharacters] = useState<Character[]>([]);
+  const [characters, setCharacters] = useState<CharacterCardData[]>([]);
 
   useEffect(() => {
-    fetchCharacters().then(setCharacters);
+    fetchCharacterCards().then(setCharacters);
   }, []);
 
   return (
@@ -34,8 +34,9 @@ export default function CharacterListPage() {
         </div>
       ) : (
         <div className='mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-          {characters.map((character) => (
-            <CharacterCard key={character.id} character={character} />
+          {/* Card response has no stable id yet; index key until the backend supplies one. */}
+          {characters.map((character, index) => (
+            <CharacterCard key={index} character={character} />
           ))}
         </div>
       )}

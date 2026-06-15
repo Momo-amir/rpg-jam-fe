@@ -2,6 +2,7 @@ import React from "react";
 
 import { AuthProvider } from "./AuthProvider";
 import { ThemeProvider } from "./Theme";
+import { ToastProvider, Toaster } from "@/components/ui/toast";
 import { type User } from "@/types/user";
 
 export const Providers: React.FC<{
@@ -10,7 +11,10 @@ export const Providers: React.FC<{
 }> = ({ children, initialUser }) => {
   return (
     <ThemeProvider>
-      <AuthProvider initialUser={initialUser}>{children}</AuthProvider>
+      <ToastProvider timeout={4000} limit={3}>
+        <AuthProvider initialUser={initialUser}>{children}</AuthProvider>
+        <Toaster />
+      </ToastProvider>
     </ThemeProvider>
   );
 };

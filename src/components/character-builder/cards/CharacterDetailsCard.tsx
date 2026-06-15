@@ -38,6 +38,8 @@ interface CharacterDetailsCardProps {
   alignment: string | undefined;
   pronouns: string | undefined;
   nameError?: string;
+  alignmentError?: string;
+  pronounsError?: string;
   className?: string;
   style?: React.CSSProperties;
   onNameChange: (value: string) => void;
@@ -50,6 +52,8 @@ export function CharacterDetailsCard({
   alignment,
   pronouns,
   nameError,
+  alignmentError,
+  pronounsError,
   className,
   style,
   onNameChange,
@@ -79,51 +83,57 @@ export function CharacterDetailsCard({
       {nameError && <p className='error-text'>{nameError}</p>}
 
       <div className='flex flex-col lg:flex-row gap-2 border-t border-white/10 pt-3'>
-        <Select
-          value={alignment ?? ""}
-          onValueChange={(value) => value && onAlignmentChange(value)}
-        >
-          <SelectTrigger size='sm' className='w-auto'>
-            <SelectValue placeholder='Alignment'>
-              {(value: string) =>
-                ALIGNMENTS.find((option) => option.value === value)?.label ??
-                "Alignment"
-              }
-            </SelectValue>
-          </SelectTrigger>
-          <SelectPopup>
-            <SelectScrollUpArrow />
-            {ALIGNMENTS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-            <SelectScrollDownArrow />
-          </SelectPopup>
-        </Select>
+        <div className='flex flex-col gap-1'>
+          <Select
+            value={alignment ?? ""}
+            onValueChange={(value) => value && onAlignmentChange(value)}
+          >
+            <SelectTrigger size='sm' className='w-auto'>
+              <SelectValue placeholder='Alignment'>
+                {(value: string) =>
+                  ALIGNMENTS.find((option) => option.value === value)?.label ??
+                  "Alignment"
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup>
+              <SelectScrollUpArrow />
+              {ALIGNMENTS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+              <SelectScrollDownArrow />
+            </SelectPopup>
+          </Select>
+          {alignmentError && <p className='error-text'>{alignmentError}</p>}
+        </div>
 
-        <Select
-          value={pronouns ?? ""}
-          onValueChange={(value) => value && onPronounsChange(value)}
-        >
-          <SelectTrigger size='sm' className='w-auto'>
-            <SelectValue placeholder='Pronouns'>
-              {(value: string) =>
-                PRONOUNS.find((option) => option.value === value)?.label ??
-                "Pronouns"
-              }
-            </SelectValue>
-          </SelectTrigger>
-          <SelectPopup>
-            <SelectScrollUpArrow />
-            {PRONOUNS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-            <SelectScrollDownArrow />
-          </SelectPopup>
-        </Select>
+        <div className='flex flex-col gap-1'>
+          <Select
+            value={pronouns ?? ""}
+            onValueChange={(value) => value && onPronounsChange(value)}
+          >
+            <SelectTrigger size='sm' className='w-auto'>
+              <SelectValue placeholder='Pronouns'>
+                {(value: string) =>
+                  PRONOUNS.find((option) => option.value === value)?.label ??
+                  "Pronouns"
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup>
+              <SelectScrollUpArrow />
+              {PRONOUNS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+              <SelectScrollDownArrow />
+            </SelectPopup>
+          </Select>
+          {pronounsError && <p className='error-text'>{pronounsError}</p>}
+        </div>
       </div>
     </div>
   );

@@ -124,7 +124,6 @@ export function buildCreateCharacterPayload(
   const weaponMasteries = byType("WeaponMastery");
   const cantrips = byType("Cantrip");
   const spells = byType("Spell");
-  const lineage = byType("Trait")[0] ?? "";
 
   const classFeatures = toPascalCaseList(
     (classTemplate?.classFeatures ?? []).map((feature) => feature.name),
@@ -153,13 +152,13 @@ export function buildCreateCharacterPayload(
     },
     background: backgroundTemplate?.name ?? "",
     class: {
-      class: classTemplate?.name ?? "",
+      type: classTemplate?.name ?? "",
     },
     speciesTraits: {
+      speciesType: speciesTemplate ? toPascalCase(speciesTemplate.name) : "",
       creatureType: speciesTemplate?.creatureType ?? "",
       size: chosenSize ? toPascalCase(chosenSize) : "",
       speed: speciesTemplate?.speed ?? 0,
-      lineage,
     },
     abilities: {
       strength: form.abilityScores.strength,
