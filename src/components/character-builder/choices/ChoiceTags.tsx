@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { ChoiceModal } from "@/components/character-builder/modals/ChoiceModal";
 import { Tag } from "@/components/ui/tag";
-import type { ActiveChoice } from "@/models/types/character-builder.types";
+import type { ActiveChoice } from "@/types/character";
 
 interface ChoiceTagsProps {
   choices: ActiveChoice[];

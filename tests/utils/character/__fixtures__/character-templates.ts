@@ -6,7 +6,7 @@ import type {
   ClassTemplate,
   SpeciesTemplate,
   BackgroundTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 
 export const fighter: ClassTemplate = {
   key: "fighter-template",

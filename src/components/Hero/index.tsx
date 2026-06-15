@@ -1,7 +1,16 @@
 import Image from "next/image";
+import type { StaticImageData } from "next/image";
 import Link from "next/link";
-import { HeroProps } from "@/models/interfaces/hero.interface";
 import { Button } from "@/components/ui/button";
+
+interface HeroProps {
+  heading: string;
+  subheading: string;
+  primaryButtonLabel: string;
+  secondaryButtonLabel: string;
+  imageSrc: string | StaticImageData;
+  imageAlt: string;
+}
 
 export default function Hero({
   heading,

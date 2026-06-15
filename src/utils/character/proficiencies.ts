@@ -2,7 +2,7 @@ import type {
   ClassTemplate,
   SpeciesTemplate,
   BackgroundTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 import {
   asArray,
   bucketChosenByType,

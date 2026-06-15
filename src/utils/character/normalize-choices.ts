@@ -3,7 +3,7 @@ import type {
   BackgroundTemplate,
   ClassTemplate,
   SpeciesTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 import { speciesImages } from "@/utils/api/character-images";
 import { formatReferenceKey } from "./stats";
 import { FEATURE_LABEL_OVERRIDES } from "./feature-labels";

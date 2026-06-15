@@ -1,6 +1,6 @@
 import { FEATURE_LABELS } from "./feature-labels";
 import { formatReferenceKey } from "./stats";
-import type { ClassTemplate } from "@/models/types/character-builder.types";
+import type { ClassTemplate } from "@/types/character";
 
 /** A single choice's detail block, shared by class/species/background templates. */
 export type ChoiceDetail = NonNullable<

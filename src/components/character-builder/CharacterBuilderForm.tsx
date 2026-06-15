@@ -13,10 +13,10 @@ import { CharacterCreationCard } from "@/components/character-builder/cards/Char
 import { CharacterDetailsCard } from "@/components/character-builder/cards/CharacterDetailsCard";
 import { ProficienciesPanel } from "@/components/character-builder/panels/ProficienciesPanel";
 import { useCharacterBuilder } from "@/components/character-builder/useCharacterBuilder";
-import { characterBuilderSchema } from "@/models/schemas/character-builder";
+import { characterBuilderSchema } from "@/types/character";
 import { createCharacter } from "@/utils/api/characters";
 import { buildCreateCharacterPayload } from "@/utils/character";
-import type { CharacterBuilderFormValues as FormValues } from "@/models/types/character-builder.types";
+import type { CharacterBuilderFormValues as FormValues } from "@/types/character";
 
 export function CharacterBuilderForm() {
   const {

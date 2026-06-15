@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { apiClient } from "@/utils/api/client";
-import { characterSchema } from "@/models/schemas/character-builder";
-import type { Character, CreateCharacterPayload } from "@/models/types/character-builder.types";
+import { characterSchema } from "@/types/character";
+import type { Character, CreateCharacterPayload } from "@/types/character";
 
 export async function fetchCharacters(): Promise<Character[]> {
   const response = await apiClient.get("/api/characters");

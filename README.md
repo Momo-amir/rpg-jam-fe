@@ -22,7 +22,7 @@ The app uses the Next.js App Router for routing and a conventional folder struct
 
 **`src/utils/`** holds all reused non-component logic. Each file is named after what it does — `cn.ts`, `formatDate.ts`, etc.
 
-**`src/types/`** is where all types live. Zod schemas are the source of truth — TypeScript types are inferred from them with `z.infer<>`.
+**`src/types/`** is where all shared types live, grouped by domain. Zod schemas are the source of truth — the inferred `z.infer<>` type sits in the same file. Large domains are a folder + barrel (`@/types/character`); component prop types stay inline with their component. See [docs/zod.md](docs/zod.md).
 
 **`src/providers/`** wraps the app with context needed everywhere: auth session, TanStack Query client, and theme.
 

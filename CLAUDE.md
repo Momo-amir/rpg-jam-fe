@@ -183,9 +183,12 @@ C# is the only real security boundary. Everything in Next.js is UX — fast redi
 - Never set it manually anywhere else — auth state must only come from a verified C# response.
 
 ### Types
-- All types live in `src/types/`. Every API shape gets a Zod schema. TypeScript types are inferred with `z.infer<>`.
+- All shared types live in `src/types/`, organized by domain. Every API/form shape gets a Zod schema, and its `z.infer<>` type is declared in the same file right below it — schema and type never live apart.
+- A large domain is a folder of small files with a barrel `index.ts` (e.g. `src/types/character/`); always import from the barrel (`@/types/character`), never reach into an internal file. A small domain is a single file (`src/types/user.ts`).
 - The same schema validates form input (RHF resolver), parses API responses, and produces the TypeScript type.
-- No hand-written interfaces for anything that comes from the API.
+- No hand-written interfaces for anything that comes from the API — write a Zod schema and infer the type.
+- **Component prop types are the exception**: keep `FooProps` inline at the top of the component's own file, never in `src/types/`.
+- See [docs/zod.md](docs/zod.md) for the full rule table and a worked example.
 
 ### Forms
 - React Hook Form + Zod resolver everywhere. No exceptions.

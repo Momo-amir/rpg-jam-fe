@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { fetchCharacters } from "@/utils/api/characters";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { buttonVariants } from "@/components/ui/button";
-import type { Character } from "@/models/types/character-builder.types";
+import type { Character } from "@/types/character";
 
 export default function CharacterListPage() {
   const [characters, setCharacters] = useState<Character[]>([]);

@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import { Tag } from "@/components/ui/tag";
-import type { OptionItem } from "@/models/types/character-builder.types";
+import type { OptionItem } from "@/types/character";
 import heroImage from "@/../public/hero.jpg";
 
 interface OptionCardProps {

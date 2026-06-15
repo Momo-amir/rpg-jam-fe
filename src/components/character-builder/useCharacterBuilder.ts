@@ -34,7 +34,7 @@ import type {
   SpeciesTemplate,
   BackgroundListItem,
   BackgroundTemplate,
-} from "@/models/types/character-builder.types";
+} from "@/types/character";
 
 type OptionList = ReturnType<typeof mapClass>[];
 

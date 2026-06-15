@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aggregateProficiencies } from "./proficiencies";
+import { aggregateProficiencies } from "@/utils/character/proficiencies";
 import { fighter, human, soldier, form } from "./__fixtures__/character-templates";
 
 describe("aggregateProficiencies", () => {
