@@ -13,6 +13,12 @@ function toDisplayLabel(label: string): string {
   return FEATURE_LABEL_OVERRIDES[label] ?? label;
 }
 
+// the main normalization function the 3 templates use
+// it turns the variation of choice structures from the API into a predictable shape ;) .
+
+// For the team: ActiveChoice is the shape the UI form expects for all the choices regardless of origin
+// So we need to flatten them and map them into that, the only big variations is to handle the times where we need bundled options like Starting Equipment
+// Read up on it in the docs directory, look up flatMap in JS Docs, or ask me
 function normalizeChoiceDetail(
   label: string,
   choice: ChoiceDetail,
@@ -40,7 +46,7 @@ function normalizeChoiceDetail(
           }),
         })),
       );
-
+  // This just makes it so if we dont have a active choice that we still give the API the value by pre-filling it.
   const prefilledValue =
     choice.numberOfChoices === 0
       ? options.length === 1
@@ -91,6 +97,8 @@ export function normalizeSpeciesChoices(
 ): ActiveChoice[] {
   return normalizeChoiceList(template?.choices);
 }
+
+// Could be unified with species, but this is for clarity and future flexibility, since either may eventually have a unique choice structure.
 
 export function normalizeBackgroundChoices(
   template: BackgroundTemplate | null,

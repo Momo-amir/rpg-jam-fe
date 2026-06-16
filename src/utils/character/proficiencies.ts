@@ -13,8 +13,16 @@ import {
 import { FEATURE_LABELS } from "./feature-labels";
 import { formatReferenceKey } from "./stats";
 
-// Species traits whose presence grants a further skill/feat choice rather than
+// This file aggregates all the character's proficiencies (skills, armor, weapons, feats, traits) into a single list for display on the character sheet in ther respective box. The
+// proficiencies come from a mix of the class/species/background templates and
+// the choices the user made when picking those templates.
+
+// Basically this stupid game has the same skills, feats, etc. show up in a million different places in the API (class features, species traits, background proficiencies, choice options)
+// and this file is responsible for gathering them all together and deduping them so the character sheet can just render one list of "skills I have"
+
+// Species traits whose presence grants a further skill/feat choice rather
 // being a passive trait. They're surfaced through the choices map, not as traits.
+
 const SKILL_GRANT_TRAITS = ["Skillful"];
 const FEAT_GRANT_TRAITS = ["Versatile"];
 

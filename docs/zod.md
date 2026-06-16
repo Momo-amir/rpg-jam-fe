@@ -59,14 +59,14 @@ src/types/
 **Always import from the domain, never from an internal file:**
 
 ```ts
-// ✅ do this — the barrel is the public surface
+// do this — the barrel is the public surface
 import {
   characterSchema,
   type Character,
   type ActiveChoice,
 } from "@/types/character";
 
-// ❌ never reach past the barrel into an internal file
+// never reach past the barrel into an internal file
 import { characterSchema } from "@/types/character/character";
 ```
 

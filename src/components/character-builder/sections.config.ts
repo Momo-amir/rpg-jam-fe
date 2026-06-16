@@ -13,7 +13,6 @@ export const FIELD_BY_KEY = {
 } as const;
 
 // Static metadata for the three main selection sections. `icon` is the Lucide
-// component itself; the consumer renders it so this stays a plain .ts file.
 export const CHARACTER_SECTIONS: CharacterSectionConfig[] = [
   {
     key: "class",
