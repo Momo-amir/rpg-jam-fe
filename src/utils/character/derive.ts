@@ -8,10 +8,6 @@ const MEDIUM_ARMOR_KEYS = [
 ];
 const LIGHT_ARMOR_KEYS = ["leather", "padded", "studded-leather-armor"];
 
-/**
- * Level-1 Armor Class. If the character chose specific equipment, derive from the
- * armor in that equipment; otherwise fall back to the class's armor training tier.
- */
 export function deriveAc(
   armorTraining: string[],
   dexMod: number,

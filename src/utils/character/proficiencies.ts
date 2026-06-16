@@ -24,11 +24,6 @@ export interface AggregatedProficiencies {
   featsAndTraits: LabeledItem[];
 }
 
-/**
- * Collects every proficiency the character has earned so far from all three
- * templates plus the user's sub-choices, and sorts them into the three groups
- * the panel renders. Pure — no React, no fetching. See docs/character_creator.md.
- */
 export function aggregateProficiencies(
   classTemplate: ClassTemplate | null,
   speciesTemplate: SpeciesTemplate | null,
@@ -53,7 +48,7 @@ export function aggregateProficiencies(
     "Feat",
   );
 
-  // ─── Skills ──────────────────────────────────────────────────────────────
+  //  Skills
   const backgroundSkills: LabeledItem[] = (
     backgroundTemplate?.skillProficiencies ?? []
   ).map((skill) => ({ value: skill, origin: backgroundTemplate?.name }));
@@ -75,9 +70,9 @@ export function aggregateProficiencies(
       })),
   );
 
-  const savingThrowItems: LabeledItem[] = (classTemplate?.savingThrow ?? []).map(
-    (save) => ({ value: `${save} Save`, origin: classTemplate?.name }),
-  );
+  const savingThrowItems: LabeledItem[] = (
+    classTemplate?.savingThrow ?? []
+  ).map((save) => ({ value: `${save} Save`, origin: classTemplate?.name }));
 
   const skills = dedupeByValue([
     ...backgroundSkills,
@@ -88,7 +83,7 @@ export function aggregateProficiencies(
     ...savingThrowItems,
   ]);
 
-  // ─── Armor & Weapons ───────────────────────────────────────────────────────
+  //  Armor & Weapons
   const armorItems: LabeledItem[] = (classTemplate?.armorTraining ?? []).map(
     (armor) => ({ value: armor }),
   );
@@ -102,12 +97,12 @@ export function aggregateProficiencies(
     ...(fromClassFeatures["WeaponMastery"] ?? []),
   ];
 
-  // ─── Feats & Traits ──────────────────────────────────────────────────────
+  // Feats & Traits
   const backgroundFeat: LabeledItem[] = backgroundTemplate?.feat
     ? [{ value: formatReferenceKey(backgroundTemplate.feat) }]
     : [];
 
-  // Show only the chosen tool, not all options. Empty until the user picks one.
+  // Show only the chosen tool, not all options. Empty until picked
   const toolItems: LabeledItem[] = resolveSelected(
     backgroundTemplate,
     FEATURE_LABELS.TOOL_PROFICIENCY,

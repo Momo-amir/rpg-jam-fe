@@ -106,7 +106,7 @@ export function buildCreateCharacterPayload(
     tools: dedupe(toPascalCaseList(chosenTools)),
     weapons: dedupe(toPascalCaseList(classTemplate?.weaponProficiency ?? [])),
     armors: dedupe(toPascalCaseList(classTemplate?.armorTraining ?? [])),
-    // No language choice surfaced in the builder yet.
+    // No language choice in the builder yet.
     languages: [],
   };
 

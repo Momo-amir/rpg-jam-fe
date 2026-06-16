@@ -2,36 +2,29 @@ import { FEATURE_LABELS } from "./feature-labels";
 import { formatReferenceKey } from "./stats";
 import type { ClassTemplate } from "@/types/character";
 
-/** A single choice's detail block, shared by class/species/background templates. */
 export type ChoiceDetail = NonNullable<
   ClassTemplate["choices"]
 >[number]["choice"];
 
-/** A template's labelled sub-choices, e.g. `{ label: "Skill Proficiencies", choice }`. */
 type LabeledChoices = { choices?: { label: string; choice: ChoiceDetail }[] };
 
-/** The form's selected-choices map: choice key -> one or many reference keys. */
 export type SelectedChoices = Record<string, string | string[]>;
 
-/** A display value plus where it came from (the class/species/background name). */
 export interface LabeledItem {
   value: string;
   origin?: string;
 }
 
-/** One choice block paired with the source it belongs to (for origin labels). */
 export interface ChoiceSource {
   choice: ChoiceDetail | null;
   origin: string | undefined;
 }
 
-/** Coerce a single value or array into an array (empty when undefined). */
 export function asArray(value: string | string[] | undefined): string[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
 }
 
-/** Find a template's choice block by its label, if present. */
 export function findChoiceByLabel(
   template: LabeledChoices | null,
   label: string,
@@ -39,7 +32,6 @@ export function findChoiceByLabel(
   return template?.choices?.find((entry) => entry.label === label)?.choice;
 }
 
-/** The reference keys the user selected for a labelled choice (empty if none). */
 export function resolveSelected(
   template: LabeledChoices | null,
   label: string,
@@ -49,7 +41,6 @@ export function resolveSelected(
   return choice ? asArray(choices[choice.id.value]) : [];
 }
 
-/** Map every option's reference key to the option type it belongs to. */
 export function indexChoiceTypes(
   details: ChoiceDetail[],
 ): Record<string, string> {
@@ -65,13 +56,11 @@ export function indexChoiceTypes(
 }
 
 /**
- * Group the reference keys the user actually chose, keyed by their option type
- * (e.g. "SkillProficiency", "Feat", "WeaponMastery"). Each chosen key is paired
- * with the source it came from so the UI can show "(Class name)" origins.
- *
- * `defaultType` is used when an option carries no type in the template — the
- * proficiencies panel treats those as feats, the payload builder as unknown.
- */
+Group the reference keys the user actually chose, keyed by their option type
+(example "SkillProficiency", "Feat", "WeaponMastery"). Each chosen key is paired
+with the source it came from so the UI can show "(Class name)" origins.
+  */
+
 export function bucketChosenByType(
   sources: ChoiceSource[],
   choices: SelectedChoices,
@@ -95,11 +84,6 @@ export function bucketChosenByType(
   return result;
 }
 
-/**
- * The reference keys inside the equipment bundle the user picked, if any.
- * Starting equipment is a "pick one bundle" choice: the selected value is a
- * group id, and we want the items inside that group (used to derive AC).
- */
 export function resolveChosenEquipmentKeys(
   template: LabeledChoices | null,
   choices: SelectedChoices,
