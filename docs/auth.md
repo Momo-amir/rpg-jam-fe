@@ -3,10 +3,6 @@
 How login, sessions, the route gate, and token refresh actually work in this
 frontend. Written to the real code so you can change it without guessing.
 
-> **Heads up:** CLAUDE.md's Auth section has drifted from the implementation.
-> Where they disagree, **this doc + the code win**. The known mismatches are
-> listed at the bottom.
-
 ---
 
 ## The one idea: C# owns auth, the frontend just reflects it
