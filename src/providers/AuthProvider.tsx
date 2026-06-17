@@ -14,11 +14,10 @@ interface AuthProviderProps {
 export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   const router = useRouter();
   const clearUser = useAuthStore((state) => state.clearUser);
-  const setUser = useAuthStore((state) => state.setUser);
 
-  useEffect(() => {
-    if (initialUser) setUser(initialUser);
-  }, []);
+  if (initialUser && useAuthStore.getState().user === null) {
+    useAuthStore.setState({ user: initialUser });
+  }
 
   useEffect(() => {
     setOnAuthFailure(() => {

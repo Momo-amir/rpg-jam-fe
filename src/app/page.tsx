@@ -8,7 +8,7 @@ export default async function Home() {
   return (
     <main className='main text-primary flex flex-col'>
       <Hero
-        heading={user ? `Welcome back, ${user.displayName}!` : "RPG JAM"}
+        heading={user ? `Welcome back, ${user.displayName}!` : "JAM RPG"}
         subheading={
           user ? "Jump back into RPG JAM" : "Your first stop character builder"
         }

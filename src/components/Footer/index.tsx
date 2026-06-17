@@ -26,9 +26,7 @@ export default function Footer() {
         </div>
         <div className='flex flex-col-reverse md:flex-row gap-4 items-baseline'>
           <div className='flex flex-col items-center md:items-start gap-4 '>
-            <nav className='flex flex-wrap md:flex-col gap-x-4 gap-y-2 md:ml-1'>
-              <Link href='/dashboard'>Dashboard</Link>
-            </nav>
+            <nav className='flex flex-wrap md:flex-col gap-x-4 gap-y-2 md:ml-1'></nav>
             <div className='flex md:flex-row gap-x-2 md:ml-2'>
               <Link href='google.com'>
                 <GithubIcon className='h-5 w-5' />
