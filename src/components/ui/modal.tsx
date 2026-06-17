@@ -25,10 +25,10 @@ export function Modal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Backdrop className='fixed inset-0 z-40 bg-black/85 backdrop-blur-sm transition-opacity duration-300 data-ending-style:opacity-0 data-starting-style:opacity-0' />
+        <Dialog.Backdrop className='fixed inset-0 z-40 bg-white/40 dark:bg-black/85 backdrop-blur-sm transition-opacity duration-300 data-ending-style:opacity-0 data-starting-style:opacity-0' />
         <Dialog.Popup
           className={cn(
-            "fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-full max-w-[85vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-white/10 bg-surface/60 backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.6)]",
+            "fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-full max-w-[85vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-white/10 bg-white/50 dark:bg-surface/60 backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.6)]",
             "transition-all duration-300 ease-out",
             "data-starting-style:translate-y-[-46%] data-starting-style:opacity-0",
             "data-ending-style:translate-y-[-46%] data-ending-style:opacity-0",
@@ -42,7 +42,7 @@ export function Modal({
                 {title}
               </Dialog.Title>
               {description && (
-                <Dialog.Description className='mt-1 text-helper text-neutraltwo'>
+                <Dialog.Description className='mt-3 text-helper text-primary'>
                   {description}
                 </Dialog.Description>
               )}
