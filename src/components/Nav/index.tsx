@@ -1,20 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { logout } from "@/utils/api/auth";
 import { Button } from "@/components/ui/button";
 import { ThemeSelector } from "@/providers/Theme/ThemeSelector";
-import { useSession } from "@/hooks/useSession";
+import { useMe } from "@/hooks/useMe";
+import { LOGIN_PATH } from "@/lib/auth";
 import { D20Icon } from "../ui/icons/D20Icon";
 
 export default function Nav() {
-  const router = useRouter();
-  const { isLoggedIn } = useSession(); // the {} around the value means we're destructuring the return value of useSession to get the isLoggedIn property from the returned object.
+  const { data: user } = useMe();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   async function handleLogout() {
-    await logout();
-    router.push("/login");
+    setLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      // Full page load: drops the whole query cache, so nothing of this user survives. Runs even if the request failed.
+      window.location.replace(LOGIN_PATH);
+    }
   }
 
   return (
@@ -25,15 +31,18 @@ export default function Nav() {
             <D20Icon className='w-8 h-8' />
             <span>JAM-RPG</span>
           </Link>{" "}
-          {isLoggedIn && <Link href='/dashboard'>Dashboard</Link>}
+          {user && <Link href='/dashboard'>Dashboard</Link>}
         </div>
 
         <div className='flex items-center gap-4'>
           <ThemeSelector />
-          {isLoggedIn ? (
-            <Button variant='outline' size='sm' onClick={handleLogout}>
-              Log out
-            </Button>
+          {user === undefined ? null : user ? (
+            <>
+              <span className='text-sm'>{user.displayName}</span>
+              <Button variant='outline' size='sm' onClick={handleLogout} loading={loggingOut}>
+                Log out
+              </Button>
+            </>
           ) : (
             <Link href='/login'>Log in</Link>
           )}

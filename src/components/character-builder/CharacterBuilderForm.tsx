@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, Shield, Wand2 } from "lucide-react";
 import Statbox, { Stats } from "@/components/ui/statbox";
@@ -16,6 +17,7 @@ import { ProficienciesPanel } from "@/components/character-builder/panels/Profic
 import { useCharacterBuilder } from "@/components/character-builder/useCharacterBuilder";
 import { characterBuilderSchema } from "@/types/character";
 import { createCharacter } from "@/utils/api/characters";
+import { queryKeys } from "@/utils/api/query-keys";
 import { useToast } from "@/components/ui/toast";
 import { buildCreateCharacterPayload } from "@/utils/character";
 import type { CharacterBuilderFormValues as FormValues } from "@/types/character";
@@ -23,6 +25,12 @@ import type { CharacterBuilderFormValues as FormValues } from "@/types/character
 export function CharacterBuilderForm() {
   const router = useRouter();
   const toast = useToast();
+  const queryClient = useQueryClient();
+  const create = useMutation({
+    mutationFn: createCharacter,
+    // The list is now out of date; the characters page refetches it.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.characters }),
+  });
   const {
     control,
     setValue,
@@ -88,7 +96,7 @@ export function CharacterBuilderForm() {
       derivedAc,
     });
     try {
-      await createCharacter(payload);
+      await create.mutateAsync(payload);
       toast.add({
         title: "Character created",
         description: `${data.name} is ready.`,

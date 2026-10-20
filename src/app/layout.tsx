@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/providers";
 import { InitTheme } from "@/providers/Theme/InitTheme";
-import { getSession } from "@/lib/session";
 
 import Nav from "@/components/Nav";
 import { D20Icon } from "@/components/ui/icons/D20Icon";
@@ -28,13 +27,11 @@ export const metadata: Metadata = {
     "A D&D/TTRPG platform for character building, party management, and at-table digital helpers.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getSession();
-
   return (
     <html
       lang='en'
@@ -45,7 +42,7 @@ export default async function RootLayout({
         <InitTheme />
       </head>
       <body className='min-h-full flex flex-col'>
-        <Providers initialUser={user}>
+        <Providers>
           <header className=''>
             <Nav />
           </header>

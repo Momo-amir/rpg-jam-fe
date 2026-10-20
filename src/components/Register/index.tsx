@@ -4,15 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RegisterFormValues, registerSchema } from "@/types/auth";
 import { register as registerUser } from "@/utils/api/auth";
+import { ApiError } from "@/utils/api/fetch";
+import { queryKeys } from "@/utils/api/query-keys";
+import { HOME_PATH } from "@/lib/auth";
 
 export const RegisterComponent: React.FC = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -25,13 +30,17 @@ export const RegisterComponent: React.FC = () => {
 
   async function onSubmit(data: RegisterFormValues) {
     try {
-      await registerUser(data);
-      router.push("/login");
+      // Register logs the user in, so go straight to the dashboard.
+      const user = await registerUser(data);
+      queryClient.setQueryData(queryKeys.me, user); // no clear(): see the login form
+      router.replace(HOME_PATH);
     } catch (error) {
+      // Identity's validation errors (e.g. DuplicateEmail, PasswordTooShort) come back as field errors.
+      const firstFieldError =
+        error instanceof ApiError ? Object.values(error.fieldErrors).flat()[0] : undefined;
       const message =
-        error instanceof Error
-          ? error.message
-          : "Registration failed. Please try again.";
+        firstFieldError ??
+        (error instanceof Error ? error.message : "Registration failed. Please try again.");
       setError("root", { message });
     }
   }
@@ -44,6 +53,8 @@ export const RegisterComponent: React.FC = () => {
           <p className=''>Enter your details and start your next adventure!</p>
         </div>
         <form
+          // POST, so a submit before React hydrates can never put the password in the URL.
+          method='post'
           onSubmit={handleSubmit(onSubmit)}
           className='flex flex-col gap-4 w-full py-8'
         >

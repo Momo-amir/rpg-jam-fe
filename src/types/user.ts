@@ -1,9 +1,11 @@
 import { z } from "zod";
 
-export const userSchema = z.object({
-  identifier: z.string(),
+/** Response of /api/me, /api/login and /api/register. */
+export const meSchema = z.object({
+  id: z.string(),
   displayName: z.string(),
   email: z.email(),
+  roles: z.array(z.string()),
 });
 
-export type User = z.infer<typeof userSchema>;
+export type User = z.infer<typeof meSchema>;

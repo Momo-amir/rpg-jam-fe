@@ -1,5 +1,5 @@
 import CardLayout from "@/components/Card";
-import { getSession } from "@/lib/session";
+import { DashboardHeading } from "./DashboardHeading";
 import heroImage from "@/public/hero.jpg";
 
 const placeholderCards = [
@@ -29,16 +29,12 @@ const placeholderCards = [
   },
 ];
 
-export default async function Dashboard() {
-  const user = await getSession();
-
+export default function Dashboard() {
   return (
     <main className='container'>
       {" "}
       <div className='my-20'>
-        <h2>
-          {user ? ` ${user.displayName}'s Dashboard` : "How did you get here?"}
-        </h2>
+        <DashboardHeading />
         <p></p>
         <div className='mt-10 flex w-full flex-col gap-6 h-auto'>
           <CardLayout cards={placeholderCards} />

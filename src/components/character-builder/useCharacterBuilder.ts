@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import {
   abilityModifier,
@@ -20,6 +21,7 @@ import {
   fetchBackground,
   fetchClass,
 } from "@/utils/api/character-options";
+import { queryKeys } from "@/utils/api/query-keys";
 import {
   CHARACTER_SECTIONS,
   FIELD_BY_KEY,
@@ -28,11 +30,8 @@ import type {
   ActiveChoice,
   CharacterBuilderFormValues as FormValues,
   CharacterSectionConfig,
-  ClassListItem,
   ClassTemplate,
-  SpeciesListItem,
   SpeciesTemplate,
-  BackgroundListItem,
   BackgroundTemplate,
 } from "@/types/character";
 
@@ -62,22 +61,11 @@ export function useCharacterBuilder(
   control: Control<FormValues>,
   setValue: UseFormSetValue<FormValues>,
 ): CharacterBuilderState {
-  const [classes, setClasses] = useState<ClassListItem[]>([]);
-  const [species, setSpecies] = useState<SpeciesListItem[]>([]);
-  const [backgrounds, setBackgrounds] = useState<BackgroundListItem[]>([]);
-  const [classTemplate, setClassTemplate] = useState<ClassTemplate | null>(
-    null,
-  );
-  const [speciesTemplate, setSpeciesTemplate] =
-    useState<SpeciesTemplate | null>(null);
-  const [backgroundTemplate, setBackgroundTemplate] =
-    useState<BackgroundTemplate | null>(null);
-
-  useEffect(() => {
-    fetchClasses().then(setClasses).catch(console.error);
-    fetchSpecies().then(setSpecies).catch(console.error);
-    fetchBackgrounds().then(setBackgrounds).catch(console.error);
-  }, []);
+  // Reference data never changes while the app runs: fetch once, keep forever.
+  const reference = { staleTime: Infinity } as const;
+  const { data: classes = [] } = useQuery({ queryKey: queryKeys.classes, queryFn: fetchClasses, ...reference });
+  const { data: species = [] } = useQuery({ queryKey: queryKeys.species, queryFn: fetchSpecies, ...reference });
+  const { data: backgrounds = [] } = useQuery({ queryKey: queryKeys.backgrounds, queryFn: fetchBackgrounds, ...reference });
 
   const [classId, speciesId, backgroundId] = useWatch({
     control,
@@ -86,20 +74,14 @@ export function useCharacterBuilder(
   const choices = useWatch({ control, name: "choices" });
   const abilityScores = useWatch({ control, name: "abilityScores" });
 
-  useEffect(() => {
-    if (!classId) return;
-    fetchClass(classId).then(setClassTemplate);
-  }, [classId]);
-
-  useEffect(() => {
-    if (!speciesId) return;
-    fetchSpeciesByKey(speciesId).then(setSpeciesTemplate);
-  }, [speciesId]);
-
-  useEffect(() => {
-    if (!backgroundId) return;
-    fetchBackground(backgroundId).then(setBackgroundTemplate);
-  }, [backgroundId]);
+  // Templates are keyed by the selected id: a slow response for an earlier pick lands in its own
+  // cache entry and can never overwrite the current one (the old useEffect race).
+  const classTemplate: ClassTemplate | null =
+    useQuery({ queryKey: queryKeys.classTemplate(classId), queryFn: () => fetchClass(classId), enabled: !!classId, ...reference }).data ?? null;
+  const speciesTemplate: SpeciesTemplate | null =
+    useQuery({ queryKey: queryKeys.speciesTemplate(speciesId), queryFn: () => fetchSpeciesByKey(speciesId), enabled: !!speciesId, ...reference }).data ?? null;
+  const backgroundTemplate: BackgroundTemplate | null =
+    useQuery({ queryKey: queryKeys.backgroundTemplate(backgroundId), queryFn: () => fetchBackground(backgroundId), enabled: !!backgroundId, ...reference }).data ?? null;
 
   useEffect(() => {
     const prefillable = [

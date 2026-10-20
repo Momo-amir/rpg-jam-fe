@@ -1,39 +1,24 @@
-import { apiClient } from "@/utils/api/client";
-import { useAuthStore } from "@/store/auth";
-import { userSchema } from "@/types/user";
-import {
-  type LoginFormValues,
-  type RegisterFormValues,
-} from "@/types/auth";
+import { apiFetch, ApiError } from "@/utils/api/fetch";
+import { meSchema, type User } from "@/types/user";
+import type { LoginFormValues, RegisterFormValues } from "@/types/auth";
 
-export async function login(data: LoginFormValues) {
-  const response = await apiClient.post("/api/login", data);
-  // safeParse instead of parse so a shape mismatch doesn't block the login return.
-  // TODO - Add better error handling for API response validation failure
-  const user = userSchema.safeParse(response.data.loginResponse);
+export const login = (data: LoginFormValues) =>
+  apiFetch("/api/login", meSchema, { method: "POST", body: data });
 
-  if (user.success) {
-    useAuthStore.getState().setUser(user.data);
-  }
-  return response.data;
-}
-
-export async function register(data: RegisterFormValues) {
-  const response = await apiClient.post("/api/register", {
-    displayName: data.displayName,
-    email: data.email,
-    password: data.password,
+export const register = (data: RegisterFormValues) =>
+  apiFetch("/api/register", meSchema, {
+    method: "POST",
+    body: { displayName: data.displayName, email: data.email, password: data.password },
   });
-  const user = userSchema.safeParse(response.data.loginResponse);
-  if (user.success) useAuthStore.getState().setUser(user.data);
-  return response.data;
-}
 
-export async function logout() {
-  const user = useAuthStore.getState().user;
+export const logout = () => apiFetch("/api/logout", undefined, { method: "POST" });
+
+/** The logged-in user, or null. "Not logged in" is an answer, not an error. */
+export async function fetchMe(): Promise<User | null> {
   try {
-    await apiClient.post("/api/logout", { email: user?.email });
-  } finally {
-    useAuthStore.getState().clearUser();
+    return await apiFetch("/api/me", meSchema);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null;
+    throw error;
   }
 }

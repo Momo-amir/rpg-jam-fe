@@ -1,44 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { NextResponse, type NextRequest } from "next/server";
+import { AUTH_COOKIE, LOGIN_PATH, PUBLIC_PATHS } from "@/lib/auth";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+// UX gate only: the API checks the session on every request, so a fake cookie gets an empty page and 401s.
+export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
 
-const publicPaths = ["/", "/login", "/register"];
-
-export default async function proxy(request: NextRequest) {
-  const isPublic = publicPaths.some((path) =>
-    path === "/"
-      ? request.nextUrl.pathname === "/"
-      : request.nextUrl.pathname.startsWith(path),
-  );
-
-  const token = request.cookies.get("access_token")?.value;
-
-  if (!isPublic) {
-    if (!token) return NextResponse.redirect(new URL("/login", request.url));
-
-    try {
-      await jwtVerify(token, secret);
-    } catch {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
+  if (PUBLIC_PATHS.includes(pathname) || request.cookies.has(AUTH_COOKIE)) {
+    return NextResponse.next();
   }
 
-  // Redirect logged-in users away from auth pages
-  if (isPublic && token) {
-    try {
-      await jwtVerify(token, secret);
-      if (request.nextUrl.pathname !== "/") {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
-    } catch {
-      // Invalid token on public page — just let them through
-    }
-  }
-
-  return NextResponse.next();
+  const loginUrl = new URL(LOGIN_PATH, request.url);
+  loginUrl.searchParams.set("from", pathname + search);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  // Skip /api (the C# API does its own auth), Next internals and files.
+  matcher: ["/((?!api(?:/|$)|_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)"],
 };
