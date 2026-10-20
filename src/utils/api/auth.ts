@@ -1,4 +1,4 @@
-import { apiFetch, ApiError } from "@/utils/api/fetch";
+import { apiFetch } from "@/utils/api/fetch";
 import { meSchema, type User } from "@/types/user";
 import type { LoginFormValues, RegisterFormValues } from "@/types/auth";
 
@@ -13,12 +13,7 @@ export const register = (data: RegisterFormValues) =>
 
 export const logout = () => apiFetch("/api/logout", undefined, { method: "POST" });
 
-/** The logged-in user, or null. "Not logged in" is an answer, not an error. */
+/** The logged-in user, or null. The API answers 204 (no body) when nobody is logged in. */
 export async function fetchMe(): Promise<User | null> {
-  try {
-    return await apiFetch("/api/me", meSchema);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) return null;
-    throw error;
-  }
+  return (await apiFetch("/api/me", meSchema.optional())) ?? null;
 }
